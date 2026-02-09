@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPS Location Simulator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .status {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 2px solid #bee5eb;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .location-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .location-info p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #555;
+    }
+    
+    .location-info strong {
+      color: #333;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .tracking-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      background: #28a745;
+      color: white;
+      border-radius: 5px;
+      font-size: 12px;
+      margin-left: 10px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📍 GPS Location Simulator</h1>
+    <p class="subtitle">Test real-time location tracking for the Emergency Management System</p>
+    
+    <div id="status" class="status info">
+      Click "Get GPS Location" to start tracking
+    </div>
+    
+    <div class="form-group">
+      <label for="name">Your Name</label>
+      <input type="text" id="name" placeholder="Enter your name" value="Test User">
+    </div>
+    
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="Enter phone number" value="+639123456789">
+    </div>
+    
+    <div class="form-group">
+      <label for="apiUrl">API URL</label>
+      <input type="text" id="apiUrl" placeholder="http://localhost:3000" value="http://localhost:3000">
+    </div>
+    
+    <div id="locationInfo" class="location-info" style="display: none;">
+      <p><strong>Latitude:</strong> <span id="lat">-</span></p>
+      <p><strong>Longitude:</strong> <span id="lng">-</span></p>
+      <p><strong>Accuracy:</strong> <span id="accuracy">-</span> meters</p>
+      <p><strong>Last Update:</strong> <span id="lastUpdate">-</span></p>
+    </div>
+    
+    <div class="button-group">
+      <button id="getLocationBtn" class="btn-primary" onclick="getLocation()">
+        📍 Get GPS Location
+      </button>
+      <button id="startTrackingBtn" class="btn-success" onclick="startTracking()" disabled>
+        ▶️ Start Tracking
+      </button>
+      <button id="stopTrackingBtn" class="btn-danger" onclick="stopTracking()" disabled style="display: none;">
+        ⏸️ Stop Tracking
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    let watchId = null;
+    let trackingInterval = null;
+    let currentPosition = null;
+    
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+    }
+    
+    function updateLocationDisplay(position) {
+      document.getElementById('lat').textContent = position.coords.latitude.toFixed(6);
+      document.getElementById('lng').textContent = position.coords.longitude.toFixed(6);
+      document.getElementById('accuracy').textContent = position.coords.accuracy.toFixed(2);
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+      document.getElementById('locationInfo').style.display = 'block';
+      currentPosition = position;
+    }
+    
+    function getLocation() {
+      if (!navigator.geolocation) {
+        showStatus('Geolocation is not supported by your browser', 'error');
+        return;
+      }
+      
+      showStatus('Getting your location...', 'info');
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          updateLocationDisplay(position);
+          showStatus('Location acquired successfully! You can now start tracking.', 'success');
+          document.getElementById('startTrackingBtn').disabled = false;
+        },
+        (error) => {
+          showStatus(`Error: ${error.message}`, 'error');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+    
+    async function sendLocationUpdate() {
+      if (!currentPosition) return;
+      
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const apiUrl = document.getElementById('apiUrl').value;
+      
+      if (!name || !phone) {
+        showStatus('Please enter name and phone number', 'error');
+        stopTracking();
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${apiUrl}/api/location`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name,
+            phone: phone,
+            location: {
+              latitude: 7.152020164824344,
+              longitude:  125.03873148148804,
+              accuracy: currentPosition.coords.accuracy
+            }
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showStatus(`✅ Tracking active - Location sent successfully`, 'success');
+        } else {
+          showStatus(`Error: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        showStatus(`Network error: ${error.message}`, 'error');
+      }
+    }
+    
+    function startTracking() {
+      if (!currentPosition) {
+        showStatus('Please get your location first', 'error');
+        return;
+      }
+      
+      // Watch position changes
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          updateLocationDisplay(position);
+        },
+        (error) => {
+          console.error('Position error:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+      
+      // Send updates every 5 seconds
+      trackingInterval = setInterval(sendLocationUpdate, 5000);
+      
+      // Send initial update
+      sendLocationUpdate();
+      
+      document.getElementById('startTrackingBtn').style.display = 'none';
+      document.getElementById('stopTrackingBtn').style.display = 'block';
+      document.getElementById('getLocationBtn').disabled = true;
+      
+      showStatus('🔴 Live tracking started - Sending updates every 5 seconds', 'success');
+    }
+    
+    function stopTracking() {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      
+      if (trackingInterval !== null) {
+        clearInterval(trackingInterval);
+        trackingInterval = null;
+      }
+      
+      document.getElementById('startTrackingBtn').style.display = 'block';
+      document.getElementById('stopTrackingBtn').style.display = 'none';
+      document.getElementById('getLocationBtn').disabled = false;
+      
+      showStatus('Tracking stopped', 'info');
+    }
+  </script>
+</body>
+</html>
