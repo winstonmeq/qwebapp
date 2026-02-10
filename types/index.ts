@@ -1,4 +1,5 @@
 export interface Location {
+  coordinates: any;
   latitude: number;
   longitude: number;
   accuracy?: number;

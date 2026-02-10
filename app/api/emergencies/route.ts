@@ -13,9 +13,8 @@ export async function POST(request: NextRequest) {
       userName: body.userName,
       userPhone: body.userPhone,
       location: {
-        latitude: body.location.latitude,
-        longitude: body.location.longitude,
-        accuracy: body.location.accuracy,
+        coordinates: [Number(body.location.longitude), Number(body.location.latitude)],
+        accuracy: Number(body.location.accuracy || 0),
         timestamp: new Date(),
       },
       emergencyType: body.emergencyType,

@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import EmergencyMap from '@/components/EmergencyMap';
 import EmergencyList from '@/components/EmergencyList';
 import StatsDashboard from '@/components/StatsDashboard';
 import { Emergency, User } from '@/types';
 import { Bell, RefreshCw, MapIcon, List, LogOut, User as UserIcon, Shield } from 'lucide-react';
+import NavigationMenu from '@/components/NavigationMenu';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -16,6 +17,13 @@ export default function DashboardPage() {
   const [selectedTab, setSelectedTab] = useState<'map' | 'list'>('map');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [alertUser, setAlertUser] = useState<User | null>(null);
+  const previousUsersRef = useRef<User[]>([]);
+
+
+
+
+
 
   const fetchEmergencies = useCallback(async () => {
     try {
@@ -33,13 +41,34 @@ export default function DashboardPage() {
     try {
       const response = await fetch('/api/location?active=true');
       const result = await response.json();
+  
       if (result.success) {
-        setUsers(result.data);
+        const newUsers = result.data;
+  
+        // 🔥 Detect new or updated user
+        newUsers.forEach((newUser: User) => {
+          const existing = previousUsersRef.current.find(
+            (u) => u._id === newUser._id
+          );
+  
+          if (!existing) {
+            setAlertUser(newUser); // new user
+          } else if (
+            new Date(newUser.lastSeen).getTime() >
+            new Date(existing.lastSeen).getTime()
+          ) {
+            setAlertUser(newUser); // updated location
+          }
+        });
+  
+        previousUsersRef.current = newUsers;
+        setUsers(newUsers);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
     }
   }, []);
+  
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -99,6 +128,9 @@ export default function DashboardPage() {
                 <p className="text-gray-400 text-sm">Real-time emergency response and tracking</p>
               </div>
             </div>
+
+            <NavigationMenu userRole={session?.user?.role || 'user'} />
+
 
             <div className="flex items-center gap-4">
               {/* User Menu */}

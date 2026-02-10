@@ -210,6 +210,17 @@
       <p><strong>Accuracy:</strong> <span id="accuracy">-</span> meters</p>
       <p><strong>Last Update:</strong> <span id="lastUpdate">-</span></p>
     </div>
+
+    <div class="form-group">
+      <label for="latitude">Manual Latitude (optional)</label>
+      <input type="number" id="latitude" step="any" placeholder="e.g. 7.123456">
+    </div>
+    
+    <div class="form-group">
+      <label for="longitude">Manual Longitude (optional)</label>
+      <input type="number" id="longitude" step="any" placeholder="e.g. 125.123456">
+    </div>
+    
     
     <div class="button-group">
       <button id="getLocationBtn" class="btn-primary" onclick="getLocation()">
@@ -270,46 +281,83 @@
     }
     
     async function sendLocationUpdate() {
-      if (!currentPosition) return;
-      
-      const name = document.getElementById('name').value;
-      const phone = document.getElementById('phone').value;
-      const apiUrl = document.getElementById('apiUrl').value;
-      
-      if (!name || !phone) {
-        showStatus('Please enter name and phone number', 'error');
-        stopTracking();
-        return;
-      }
-      
-      try {
-        const response = await fetch(`${apiUrl}/api/location`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: name,
-            phone: phone,
-            location: {
-              latitude: 7.152020164824344,
-              longitude:  125.03873148148804,
-              accuracy: currentPosition.coords.accuracy
-            }
-          })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          showStatus(`✅ Tracking active - Location sent successfully`, 'success');
-        } else {
-          showStatus(`Error: ${result.error}`, 'error');
-        }
-      } catch (error) {
-        showStatus(`Network error: ${error.message}`, 'error');
-      }
+  const name = document.getElementById('name').value;
+  const phone = document.getElementById('phone').value;
+  const apiUrl = document.getElementById('apiUrl').value;
+
+  const manualLat = document.getElementById('latitude').value;
+  const manualLng = document.getElementById('longitude').value;
+
+  if (!name || !phone) {
+    showStatus('Please enter name and phone number', 'error');
+    stopTracking();
+    return;
+  }
+
+  let latitude;
+  let longitude;
+  let accuracy = 5; // default for manual mode
+
+  // 🔥 PRIORITY: Manual input if provided
+  if (manualLat && manualLng) {
+    latitude = parseFloat(manualLat);
+    longitude = parseFloat(manualLng);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      showStatus('Invalid manual coordinates', 'error');
+      return;
     }
+
+    // Fake a position object for display
+    updateLocationDisplay({
+      coords: {
+        latitude: latitude,
+        longitude: longitude,
+        accuracy: accuracy
+      }
+    });
+
+  } else {
+    // Otherwise use real GPS
+    if (!currentPosition) {
+      showStatus('No GPS position available', 'error');
+      return;
+    }
+
+    latitude = currentPosition.coords.latitude;
+    longitude = currentPosition.coords.longitude;
+    accuracy = currentPosition.coords.accuracy;
+  }
+
+  try {
+    const response = await fetch(`${apiUrl}/api/location`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name,
+        phone: phone,
+        location: {
+          latitude: latitude,
+          longitude: longitude,
+          accuracy: accuracy
+        }
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showStatus(`✅ Location sent successfully`, 'success');
+    } else {
+      showStatus(`Error: ${result.error}`, 'error');
+    }
+  } catch (error) {
+    showStatus(`Network error: ${error.message}`, 'error');
+  }
+}
+
     
     function startTracking() {
       if (!currentPosition) {
