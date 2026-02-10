@@ -174,69 +174,81 @@ export default function EmergencyMap({
         <MapController alertUser={alertUser} />
 
         {/* Emergency Markers */}
-        {emergencies.map((emergency) => {
-          if (!emergency.location?.coordinates?.length) return null;
-          const [lng, lat] = emergency.location.coordinates;
-          if (lat == null || lng == null) return null;
+        {emergencies.map((emergency, index) => {
+              if (!emergency.location?.coordinates?.length) return null;
+                      const [lng, lat] = emergency.location.coordinates;
+                      if (lat == null || lng == null) return null;
 
-          const icon = createCustomIcon(emergency.severity);
-          if (!icon) return null;
+                      const icon = createCustomIcon(emergency.severity);
+                      if (!icon) return null;
 
-          return (
-            <Marker key={emergency._id} position={[lat, lng]} icon={icon}>
-              <Popup className="custom-popup">
-                <div className="p-2 min-w-[200px]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="text-red-600" size={20} />
-                    <h3 className="font-bold text-lg capitalize">{emergency.emergencyType}</h3>
-                  </div>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded text-white text-xs ${getStatusBadge(emergency.status)}`}>
-                        {emergency.status.toUpperCase()}
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded text-white text-xs`}
-                        style={{ backgroundColor: getSeverityColor(emergency.severity) }}
-                      >
-                        {emergency.severity.toUpperCase()}
-                      </span>
-                    </div>
-                    <p className="flex items-center gap-1">
-                      <MapPin size={14} />
-                      <strong>User:</strong> {emergency.userName}
-                    </p>
-                    <p className="flex items-center gap-1">
-                      <Phone size={14} />
-                      <strong>Phone:</strong> {emergency.userPhone}
-                    </p>
-                    {emergency.description && (
-                      <p className="mt-2">
-                        <strong>Description:</strong> {emergency.description}
-                      </p>
-                    )}
-                    <p className="flex items-center gap-1 text-xs text-gray-600">
-                      <Clock size={12} />
-                      {new Date(emergency.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </Popup>
-              {emergency.location.accuracy && (
-                <Circle
-                  center={[lat, lng]}
-                  radius={emergency.location.accuracy}
-                  pathOptions={{
-                    color: getSeverityColor(emergency.severity),
-                    fillColor: getSeverityColor(emergency.severity),
-                    fillOpacity: 0.1,
-                  }}
-                />
-              )}
-            </Marker>
-          );
-        })}
+                      const isNewest = index === 0;
 
+        console.log('newwest', isNewest, index);
+  return (
+    <Marker key={emergency._id} position={[lat, lng]} icon={icon} 
+    eventHandlers={{
+      add: (e) => {
+        // Only trigger openPopup if this is the newest item
+        if (isNewest) {
+          e.target.openPopup();
+        }
+      },
+    }}
+    >
+      <Popup className="custom-popup">
+        <div className="p-2 min-w-[200px]">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="text-red-600" size={20} />
+            <h3 className="font-bold text-lg capitalize">{emergency.emergencyType}</h3>
+          </div>
+          <div className="space-y-1 text-sm">
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-1 rounded text-white text-xs ${getStatusBadge(emergency.status)}`}>
+                {emergency.status.toUpperCase()}
+              </span>
+              <span
+                className={`px-2 py-1 rounded text-white text-xs`}
+                style={{ backgroundColor: getSeverityColor(emergency.severity) }}
+              >
+                {emergency.severity.toUpperCase()}
+              </span>
+            </div>
+            <p className="flex items-center gap-1">
+              <MapPin size={14} />
+              <strong>User:</strong> {emergency.userName}
+            </p>
+            <p className="flex items-center gap-1">
+              <Phone size={14} />
+              <strong>Phone:</strong> {emergency.userPhone}
+            </p>
+            {emergency.description && (
+              <p className="mt-2">
+                <strong>Description:</strong> {emergency.description}
+              </p>
+            )}
+            <p className="flex items-center gap-1 text-xs text-gray-600">
+              <Clock size={12} />
+              {new Date(emergency.createdAt).toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </Popup>
+
+      {emergency.location.accuracy && (
+        <Circle
+          center={[lat, lng]}
+          radius={emergency.location.accuracy}
+          pathOptions={{
+            color: getSeverityColor(emergency.severity),
+            fillColor: getSeverityColor(emergency.severity),
+            fillOpacity: 0.1,
+          }}
+        />
+      )}
+    </Marker>
+  );
+})}
         {/* User Markers */}
         {users.map((user) => {
           if (!user.currentLocation) return null;
