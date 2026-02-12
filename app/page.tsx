@@ -8,6 +8,7 @@ import StatsDashboard from '@/components/StatsDashboard';
 import { Emergency, User } from '@/types';
 import { Bell, RefreshCw, MapIcon, List, LogOut, User as UserIcon, Shield } from 'lucide-react';
 import NavigationMenu from '@/components/NavigationMenu';
+import EmergencyManagement from '@/components/EmergencyManagement';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -122,7 +123,7 @@ export default function DashboardPage() {
                 <Bell className="text-white" size={32} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white tracking-tight">
+                <h1 className="text-2xl font-bold text-white tracking-tight">
                   Emergency Management System
                 </h1>
                 <p className="text-gray-400 text-sm">Real-time emergency response and tracking</p>
@@ -193,13 +194,13 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {loading ? (
           <div className="flex items-center justify-center h-96">
             <div className="text-white text-xl">Loading dashboard...</div>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-4">
             {/* Statistics Dashboard */}
             <StatsDashboard emergencies={emergencies} users={users} />
 
@@ -238,10 +239,8 @@ export default function DashboardPage() {
               ) : (
                 <div className="p-6">
                   <h2 className="text-2xl font-bold text-white mb-6">Active Emergencies</h2>
-                  <EmergencyList
-                    emergencies={emergencies}
-                    onUpdateStatus={handleUpdateStatus}
-                  />
+                      <EmergencyManagement />
+
                 </div>
               )}
             </div>

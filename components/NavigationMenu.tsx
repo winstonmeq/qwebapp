@@ -11,7 +11,8 @@ import {
   Home, 
   FileText,
   Settings,
-  ChevronDown
+  ChevronDown,
+  BarChart3
 } from 'lucide-react';
 
 interface NavigationMenuProps {
@@ -63,6 +64,12 @@ export default function NavigationMenu({ userRole }: NavigationMenuProps) {
       label: 'Admin Dashboard', 
       icon: Shield,
       description: 'System administration'
+    },
+    { 
+      href: '/reports', 
+      label: 'Reports & Analytics', 
+      icon: BarChart3,
+      description: 'Generate reports'
     },
     { 
       href: '/settings', 

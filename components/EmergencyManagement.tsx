@@ -25,28 +25,50 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
-interface Emergency {
+// interface Emergency {
+//   _id: string;
+//   userId: string;
+//   userName: string;
+//   userPhone: string;
+//   emergencyType: string;
+//   severity: 'low' | 'medium' | 'high' | 'critical';
+//   status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'cancelled';
+//   description: string;
+//   location: {
+//     latitude: number;
+//     longitude: number;
+//     accuracy?: number;
+//   };
+//   responder?: {
+//     id: string;
+//     name: string;
+//     respondedAt: Date;
+//   };
+//   resolvedAt?: Date;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+
+
+export interface Emergency {
   _id: string;
   userId: string;
   userName: string;
   userPhone: string;
-  emergencyType: string;
+  emergencyType: 'medical' | 'fire' | 'crime' | 'accident' | 'natural-disaster' | 'other';
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'cancelled';
-  description: string;
+  description?: string;
   location: {
-    latitude: number;
-    longitude: number;
+    type: 'Point';
+    coordinates: [number, number]; // [longitude, latitude]
     accuracy?: number;
   };
-  responder?: {
-    id: string;
-    name: string;
-    respondedAt: Date;
-  };
-  resolvedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  responderId?: string;
+  responderName?: string;
+  estimatedArrival?: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export default function EmergencyManagement() {
@@ -73,14 +95,15 @@ export default function EmergencyManagement() {
 
   useEffect(() => {
     fetchEmergencies();
-    const interval = setInterval(fetchEmergencies, 10000); // Refresh every 10 seconds
-    return () => clearInterval(interval);
+    // const interval = setInterval(fetchEmergencies, 10000); // Refresh every 10 seconds
+    // return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     filterEmergencies();
   }, [emergencies, searchTerm, statusFilter, severityFilter, typeFilter]);
 
+  
   const fetchEmergencies = async () => {
     setLoading(true);
     try {
@@ -104,7 +127,7 @@ export default function EmergencyManagement() {
       filtered = filtered.filter(emergency =>
         emergency.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emergency.userPhone.includes(searchTerm) ||
-        emergency.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        // emergency.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emergency.emergencyType.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -311,6 +334,7 @@ export default function EmergencyManagement() {
   const exportEmergencies = () => {
     const csv = [
       ['Date', 'Name', 'Phone', 'Type', 'Severity', 'Status', 'Description', 'Location'],
+
       ...filteredEmergencies.map(e => [
         new Date(e.createdAt).toLocaleString(),
         e.userName,
@@ -319,7 +343,7 @@ export default function EmergencyManagement() {
         e.severity,
         e.status,
         e.description,
-        `${e.location.latitude}, ${e.location.longitude}`
+        `${e.location?.coordinates?.[1] ?? ''}, ${e.location?.coordinates?.[0] ?? ''}`
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -740,7 +764,7 @@ export default function EmergencyManagement() {
                     </div>
                     <p className="text-sm text-gray-300">{selectedEmergency.description}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-400 mt-2">
-                      <span>📍 {selectedEmergency.location.latitude}, {selectedEmergency.location.longitude}</span>
+                      <span>📍 {selectedEmergency.location?.coordinates?.[1] ?? ''}, {selectedEmergency.location?.coordinates?.[0] ?? ''}</span>
                       <span>📞 {selectedEmergency.userPhone}</span>
                     </div>
                   </div>
@@ -864,7 +888,7 @@ export default function EmergencyManagement() {
                 {/* Emergency Info */}
                 <div className="bg-gray-900 rounded-lg p-4 space-y-3">
                   <InfoRow label="Type" value={selectedEmergency.emergencyType.replace('-', ' ').toUpperCase()} />
-                  <InfoRow label="Description" value={selectedEmergency.description} />
+                  {/* <InfoRow label="Description" value={selectedEmergency.description} /> */}
                   <InfoRow label="Reported" value={formatDistanceToNow(new Date(selectedEmergency.createdAt), { addSuffix: true })} />
                 </div>
 
@@ -880,13 +904,13 @@ export default function EmergencyManagement() {
                   <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Location</h3>
                   <InfoRow 
                     label="Coordinates" 
-                    value={`${selectedEmergency.location.latitude.toFixed(6)}, ${selectedEmergency.location.longitude.toFixed(6)}`} 
+                    value={`${selectedEmergency.location.coordinates[1]}, ${selectedEmergency.location.coordinates[0]}`} 
                   />
                   {selectedEmergency.location.accuracy && (
                     <InfoRow label="Accuracy" value={`±${selectedEmergency.location.accuracy}m`} />
                   )}
                   <a
-                    href={`https://www.google.com/maps?q=${selectedEmergency.location.latitude},${selectedEmergency.location.longitude}`}
+                    href={`https://www.google.com/maps?q=${selectedEmergency.location.coordinates[1]},${selectedEmergency.location.coordinates[0]}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm"
@@ -897,13 +921,13 @@ export default function EmergencyManagement() {
                 </div>
 
                 {/* Responder Info */}
-                {selectedEmergency.responder && (
+                {selectedEmergency.responderName && (
                   <div className="bg-gray-900 rounded-lg p-4 space-y-3">
                     <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Response Information</h3>
-                    <InfoRow label="Responder" value={selectedEmergency.responder.name} />
+                    <InfoRow label="Responder" value={selectedEmergency.responderName} />
                     <InfoRow 
                       label="Responded At" 
-                      value={formatDistanceToNow(new Date(selectedEmergency.responder.respondedAt), { addSuffix: true })} 
+                      value={formatDistanceToNow(new Date(selectedEmergency.createdAt), { addSuffix: true })} 
                     />
                   </div>
                 )}

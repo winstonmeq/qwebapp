@@ -31,7 +31,7 @@ export default function StatsDashboard({ emergencies, users }: StatsDashboardPro
     color: string; 
     bgColor: string;
   }) => (
-    <div className={`${bgColor} rounded-xl p-6 border-2 ${color} shadow-lg transform transition-all hover:scale-105`}>
+    <div className={`${bgColor} rounded-xl p-4 border-2 ${color} shadow-lg transform transition-all hover:scale-105`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">{title}</p>
