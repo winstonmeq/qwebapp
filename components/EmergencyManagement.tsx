@@ -538,8 +538,12 @@ export default function EmergencyManagement() {
                       <User size={14} className="text-gray-400" />
                       <div>
                         <p className="text-sm text-white">{emergency.userName}</p>
-                        <p className="text-xs text-gray-400">{emergency.userPhone}</p>
-                      </div>
+                        <p className="text-xs text-gray-400">
+                            <a href={`tel:${emergency.userPhone}`} className="hover:text-blue-500 underline">
+                              {emergency.userPhone}
+                            </a>
+                          </p>                      
+                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
