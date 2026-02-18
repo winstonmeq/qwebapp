@@ -22,6 +22,8 @@ export interface IUser extends Document {
   password: string;
   phone: string;
   role: 'user' | 'admin' | 'responder';
+  lguId?: string;      // NEW: "quezon-city", "manila", etc.
+  lguName?: string;    // NEW: "Quezon City", "Manila", etc.
   currentLocation?: {
     latitude: number;
     longitude: number;

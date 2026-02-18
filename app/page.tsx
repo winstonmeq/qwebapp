@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import EmergencyMap from '@/components/EmergencyMap';
 import EmergencyList from '@/components/EmergencyList';
 import StatsDashboard from '@/components/StatsDashboard';
@@ -11,7 +12,7 @@ import NavigationMenu from '@/components/NavigationMenu';
 import EmergencyManagement from '@/components/EmergencyManagement';
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [emergencies, setEmergencies] = useState<Emergency[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,13 +21,11 @@ export default function DashboardPage() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [alertUser, setAlertUser] = useState<User | null>(null);
   const previousUsersRef = useRef<User[]>([]);
+  const router = useRouter();
 
 
 
-
-
-
-  const fetchEmergencies = useCallback(async () => {
+ const fetchEmergencies = useCallback(async () => {
     try {
       const response = await fetch('/api/emergencies');
       const result = await response.json();
@@ -110,6 +109,25 @@ export default function DashboardPage() {
     }
   };
 
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+    }
+  }, [session, status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
+  
   const pendingCount = emergencies.filter(e => e.status === 'pending').length;
 
   return (
