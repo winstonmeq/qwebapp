@@ -57,7 +57,7 @@ interface ReportData {
     resolutionRate: number;
   };
   topResponders: Array<{
-    name: string;
+    fName: string;
     count: number;
   }>;
   emergenciesList: Array<any>;
@@ -284,7 +284,7 @@ export default function ReportsPage() {
 
         const respondersData = reportData.topResponders.map((r, i) => [
           `${i + 1}`,
-          r.name,
+          r.fName,
           r.count.toString()
         ]);
 
@@ -453,7 +453,7 @@ Other: ${data.byType.other}
 ========================================
 TOP RESPONDERS
 ========================================
-${data.topResponders.map((r, i) => `${i + 1}. ${r.name}: ${r.count} emergencies`).join('\n')}
+${data.topResponders.map((r, i) => `${i + 1}. ${r.fName}: ${r.count} emergencies`).join('\n')}
 
 Generated on: ${new Date().toLocaleString()}
 `;
@@ -749,7 +749,7 @@ Generated on: ${new Date().toLocaleString()}
                             <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-sm">
                               {index + 1}
                             </div>
-                            <span className="text-white font-medium">{responder.name}</span>
+                            <span className="text-white font-medium">{responder.fName}</span>
                           </div>
                           <span className="text-gray-400">{responder.count} emergencies</span>
                         </div>

@@ -19,7 +19,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
-    } else if (session?.user?.role !== 'admin') {
+    } else if (session?.user?.role !== 'system-admin') {
       router.push('/');
     }
   }, [session, status, router]);
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (session?.user?.role === 'admin') {
+    if (session?.user?.role === 'system-admin') {
       fetchUsers();
     }
   }, [session]);
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (session?.user?.role !== 'admin') {
+  if (session?.user?.role !== 'system-admin') {
     return null;
   }
 
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600 uppercase">Admins</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {users.filter(u => u.role === 'admin').length}
+                  {users.filter(u => u.role === 'system-admin').length}
                 </p>
               </div>
               <div className="p-3 bg-red-100 rounded-full">
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{user.fName}</div>
                         </div>
                       </div>
                     </td>

@@ -123,7 +123,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context :{params : Promise<{id: string}>}
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -136,7 +136,7 @@ export async function DELETE(
     }
 
     // Only admins can delete emergencies
-    if (session.user.role !== 'admin') {
+    if (session.user.role !== 'system-admin') {
       return NextResponse.json({
         success: false,
         error: 'Forbidden - Admin access required',
@@ -145,7 +145,9 @@ export async function DELETE(
 
     await connectDB();
     
-    const emergency = await EmergencyModel.findByIdAndDelete(params.id);
+    const {id} = await context.params;
+    
+    const emergency = await EmergencyModel.findByIdAndDelete(id);
 
     if (!emergency) {
       return NextResponse.json({

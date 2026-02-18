@@ -62,10 +62,10 @@ export async function POST(request: NextRequest) {
     const byType = {
       medical: emergencies.filter(e => e.emergencyType === 'medical').length,
       fire: emergencies.filter(e => e.emergencyType === 'fire').length,
-      crime: emergencies.filter(e => e.emergencyType === 'crime').length,
+      crime: emergencies.filter(e => e.emergencyType === 'flood').length,
       accident: emergencies.filter(e => e.emergencyType === 'accident').length,
-      'natural-disaster': emergencies.filter(e => e.emergencyType === 'natural-disaster').length,
-      other: emergencies.filter(e => e.emergencyType === 'other').length,
+      'landslide': emergencies.filter(e => e.emergencyType === 'landslide').length,
+      other: emergencies.filter(e => e.emergencyType === 'ambulance').length,
     };
 
     // Response Statistics

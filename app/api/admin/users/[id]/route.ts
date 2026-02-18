@@ -11,7 +11,7 @@ export async function PATCH(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session || session.user.role !== 'system-admin') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
@@ -56,7 +56,7 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session || session.user.role !== 'system-admin') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',

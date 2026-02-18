@@ -30,7 +30,7 @@ export default function EmergenciesPage() {
   }
 
   // Only admins and responders can access full emergency management
-  const canManage = session.user.role === 'admin' || session.user.role === 'responder';
+  const canManage = session.user.role === 'system-admin' || session.user.role === 'responder';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">

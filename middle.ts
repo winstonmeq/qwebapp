@@ -19,7 +19,7 @@ export default withAuth(
     }
 
     // Check admin access
-    if (isAdminPage && token?.role !== 'admin') {
+    if (isAdminPage && token?.role !== 'system-admin') {
       return NextResponse.redirect(new URL('/unauthorized', req.url));
     }
 

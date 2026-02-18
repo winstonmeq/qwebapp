@@ -140,7 +140,7 @@ export default function DashboardPage() {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
                 >
-                  {session?.user?.role === 'admin' ? (
+                  {session?.user?.role === 'system-admin' ? (
                     <Shield className="text-yellow-400" size={20} />
                   ) : (
                     <UserIcon className="text-white" size={20} />

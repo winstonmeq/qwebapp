@@ -8,7 +8,8 @@ import { Mail, Lock, User, Phone, AlertCircle, UserPlus } from 'lucide-react';
 export default function SignUpPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: '',
+    fName: '',
+    lName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -42,7 +43,7 @@ export default function SignUpPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          fName: formData.fName,
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
@@ -90,13 +91,28 @@ export default function SignUpPage() {
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 <User className="inline mr-2" size={16} />
-                Full Name
+                First Name
               </label>
               <input
                 type="text"
                 required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={formData.fName}
+                onChange={(e) => setFormData({ ...formData, fName: e.target.value })}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors"
+                placeholder="Enter your full name"
+              />
+            </div>
+
+              <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <User className="inline mr-2" size={16} />
+                Last Name
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.lName}
+                onChange={(e) => setFormData({ ...formData, fName: e.target.value })}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors"
                 placeholder="Enter your full name"
               />

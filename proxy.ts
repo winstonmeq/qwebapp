@@ -19,7 +19,7 @@ export default withAuth(
     }
 
     // 3. Role-based access control for Admin routes
-    if (isAdminPage && token?.role !== 'admin') {
+    if (isAdminPage && token?.role !== 'system-admin') {
       return NextResponse.redirect(new URL('/unauthorized', req.url));
     }
 
@@ -36,6 +36,8 @@ export const config = {
   matcher: [
     '/',
     '/admin/:path*',
+    '/users/:path*', // Add this
+    '/reports/:path*', // Also check if this should be plural to match your links
     '/report',
     '/auth/:path*',
   ],

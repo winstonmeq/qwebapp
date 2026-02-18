@@ -6,30 +6,37 @@ export interface Location {
   timestamp: Date;
 }
 
+// /types/index.ts
+
 export interface Emergency {
-  _id?: string;
+  _id: string;
   userId: string;
   userName: string;
   userPhone: string;
-  location: Location;
   emergencyType: 'medical' | 'fire' | 'crime' | 'accident' | 'natural-disaster' | 'other';
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'cancelled';
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  location: {
+    type: 'Point';
+    coordinates: [number, number]; // [longitude, latitude]
+    accuracy?: number;
+  };
   responderId?: string;
   responderName?: string;
-  estimatedArrival?: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface User {
   _id?: string;
+  googleId?: string;
   name: string;
   email: string;
-  password?: string;
+  image?: string;
+  lguCode:string;
   phone: string;
-  role: 'user' | 'admin' | 'responder';
+  role: 'user' | 'system-admin' | 'responder';
   currentLocation?: Location;
   isActive: boolean;
   lastSeen: Date;

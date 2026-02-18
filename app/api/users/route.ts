@@ -1,142 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import UserModel from '@/models/User';
-import bcrypt from 'bcryptjs';
 import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 
-
-// GET - Fetch all users
+// GET - Fetch users (Security: System Admin sees all, Others see only their LGU)
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({
-        success: false,
-        error: 'Unauthorized',
-      }, { status: 401 });
-    }
-
-    // Only admins can view all users
-    if (session.user.role !== 'admin') {
-      return NextResponse.json({
-        success: false,
-        error: 'Forbidden - Admin access required',
-      }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectDB();
 
-    const users = await UserModel.find({})
-      .select('-password')
+    let query = {};
+    // If not a system-admin, filter by the admin's lguCode
+    if (session.user.role !== 'system-admin') {
+      if (!session.user.lguCode) {
+        return NextResponse.json({ success: false, error: 'LGU Code missing from session' }, { status: 403 });
+      }
+      query = { lguCode: session.user.lguCode };
+    }
+
+    const users = await UserModel.find(query)
+      .select('-password') // Safety precaution even if empty
       .sort({ createdAt: -1 });
 
-    return NextResponse.json({
-      success: true,
-      data: users,
-    });
+    return NextResponse.json({ success: true, data: users });
   } catch (error: any) {
-    console.error('Error fetching users:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-    }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-// POST - Create new user
+// POST - Create user (Admin only - Google users usually self-register, but this is for manual entry)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-      return NextResponse.json({
-        success: false,
-        error: 'Unauthorized',
-      }, { status: 401 });
-    }
-
-    // Only admins can create users
-    if (session.user.role !== 'admin') {
-      return NextResponse.json({
-        success: false,
-        error: 'Forbidden - Admin access required',
-      }, { status: 403 });
+    if (!session || session.user.role !== 'system-admin') {
+      return NextResponse.json({ success: false, error: 'Forbidden - Admin only' }, { status: 403 });
     }
 
     const body = await request.json();
-    const { name, email, phone, password, role, isActive } = body;
+    const { name, email, phone, role, lguCode, googleId, image } = body;
 
-    // Validation
-    if (!name || !email || !phone || !password) {
-      return NextResponse.json({
-        success: false,
-        error: 'All fields are required',
-      }, { status: 400 });
-    }
-
-    // Email validation
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid email format',
-      }, { status: 400 });
-    }
-
-    // Password validation
-    if (password.length < 6) {
-      return NextResponse.json({
-        success: false,
-        error: 'Password must be at least 6 characters',
-      }, { status: 400 });
+    if (!name || !email || !googleId) {
+      return NextResponse.json({ success: false, error: 'Name, Email, and Google ID are required' }, { status: 400 });
     }
 
     await connectDB();
 
-    // Check if user already exists
-    const existingUser = await UserModel.findOne({
-      $or: [{ email }, { phone }],
-    });
-
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      return NextResponse.json({
-        success: false,
-        error: 'User with this email or phone already exists',
-      }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'User already exists' }, { status: 400 });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
     const user = new UserModel({
       name,
       email,
-      password: hashedPassword,
       phone,
+      googleId,
+      image,
       role: role || 'user',
-      isActive: isActive !== undefined ? isActive : true,
+      lguCode: lguCode || session.user.lguCode,
+      isActive: true,
       lastSeen: new Date(),
     });
 
     await user.save();
 
-    // Return user without password
-    const userResponse = user.toObject();
-    // delete userResponse.password;
-
-    return NextResponse.json({
-      success: true,
-      data: userResponse,
-      message: 'User created successfully',
-    }, { status: 201 });
+    return NextResponse.json({ success: true, data: user }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating user:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-    }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

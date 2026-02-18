@@ -148,7 +148,7 @@ export default function EmergencyMap({
         <div className="absolute top-4 right-4 z-[9999] bg-red-600 text-white p-4 rounded-xl shadow-xl w-[320px] animate-pulse">
           <h3 className="font-bold text-lg">🚨 New Location Update</h3>
           <p className="mt-2 text-sm">
-            <strong>{alertUser.name}</strong> updated location
+            <strong>{alertUser.fName}</strong> updated location
           </p>
           <p className="text-xs mt-1">{new Date(alertUser.lastSeen).toLocaleString()}</p>
           <button
@@ -261,7 +261,7 @@ export default function EmergencyMap({
           return (
             <Marker key={user._id} position={[latitude, longitude]} icon={icon} autoPan={true}>
               <Popup>
-                <div className="p-2 text-sm font-bold">{user.name}</div>
+                <div className="p-2 text-sm font-bold">{user.fName}</div>
               </Popup>
               {accuracy && (
                 <Circle

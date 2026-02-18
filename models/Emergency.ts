@@ -24,6 +24,7 @@ const LocationSchema = new Schema(
 );
 
 export interface IEmergency extends Document {
+  lguCode: string; // Added reference to LGU
   userId: string;
   userName: string;
   userPhone: string;
@@ -35,10 +36,11 @@ export interface IEmergency extends Document {
   emergencyType:
     | 'medical'
     | 'fire'
-    | 'crime'
+    | 'police'
     | 'accident'
-    | 'natural-disaster'
-    | 'other';
+    | 'landslide'
+    | 'flood'
+    | 'ambulance';
   severity: 'low' | 'medium' | 'high' | 'critical';
   status:
     | 'pending'
@@ -56,6 +58,7 @@ export interface IEmergency extends Document {
 
 const EmergencySchema = new Schema<IEmergency>(
   {
+    lguCode: { type: Schema.Types.String, ref: 'LGU', required: true },
     userId: { type: String, required: true },
     userName: { type: String, required: true },
     userPhone: { type: String, required: true },
@@ -67,7 +70,7 @@ const EmergencySchema = new Schema<IEmergency>(
 
     emergencyType: {
       type: String,
-      enum: ['medical', 'fire', 'crime', 'accident', 'natural-disaster', 'other'],
+      enum: ['medical', 'fire', 'police', 'accident', 'landslide', 'flood', 'ambulance'],
       required: true,
     },
 
@@ -84,7 +87,6 @@ const EmergencySchema = new Schema<IEmergency>(
     },
 
     description: { type: String },
-
     responderId: { type: String },
     responderName: { type: String },
     estimatedArrival: { type: Date },
@@ -102,10 +104,11 @@ const EmergencySchema = new Schema<IEmergency>(
 // EmergencySchema.index({ location: '2dsphere' });
 
 // Filter dashboard by status + latest
-// EmergencySchema.index({ status: 1, createdAt: -1 });
+EmergencySchema.index({ status: 1, createdAt: -1 });
 
 // Query by user history
-// EmergencySchema.index({ userId: 1 });
+EmergencySchema.index({ userId: 1 });
+EmergencySchema.index({ lguCode: 1, status: 1 });
 
 const EmergencyModel: Model<IEmergency> =
   mongoose.models.Emergency ||

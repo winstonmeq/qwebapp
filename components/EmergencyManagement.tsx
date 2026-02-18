@@ -24,52 +24,8 @@ import {
   X
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-
-// interface Emergency {
-//   _id: string;
-//   userId: string;
-//   userName: string;
-//   userPhone: string;
-//   emergencyType: string;
-//   severity: 'low' | 'medium' | 'high' | 'critical';
-//   status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'cancelled';
-//   description: string;
-//   location: {
-//     latitude: number;
-//     longitude: number;
-//     accuracy?: number;
-//   };
-//   responder?: {
-//     id: string;
-//     name: string;
-//     respondedAt: Date;
-//   };
-//   resolvedAt?: Date;
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
-
-
-export interface Emergency {
-  _id: string;
-  userId: string;
-  userName: string;
-  userPhone: string;
-  emergencyType: 'medical' | 'fire' | 'crime' | 'accident' | 'natural-disaster' | 'other';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'cancelled';
-  description?: string;
-  location: {
-    type: 'Point';
-    coordinates: [number, number]; // [longitude, latitude]
-    accuracy?: number;
-  };
-  responderId?: string;
-  responderName?: string;
-  estimatedArrival?: Date;
-  createdAt: string | Date;
-  updatedAt: string | Date;
-}
+import ChatModal from './ChatModal';
+import { Emergency } from '@/types'; 
 
 export default function EmergencyManagement() {
   const { data: session } = useSession();
@@ -92,6 +48,14 @@ export default function EmergencyManagement() {
     notes: '',
     priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
   });
+
+
+const [activeChat, setActiveChat] = useState<Emergency | null>(null);
+
+
+
+
+
 
   useEffect(() => {
     fetchEmergencies();
@@ -527,9 +491,9 @@ export default function EmergencyManagement() {
                         <p className="text-sm font-medium text-white capitalize">
                           {emergency.emergencyType.replace('-', ' ')}
                         </p>
-                        <p className="text-xs text-gray-400 line-clamp-2 max-w-xs">
+                        {/* <p className="text-xs text-gray-400 line-clamp-2 max-w-xs">
                           {emergency.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   </td>
@@ -604,27 +568,62 @@ export default function EmergencyManagement() {
                           >
                             <PlayCircle size={18} />
                           </button>
+
+         
+                            <button
+                            onClick={() => setActiveChat(emergency)}
+                            className="text-green-400 hover:text-green-300 transition-colors"
+                            title="Chat with Reporter"
+                          >
+                            <MessageSquare size={18} />
+                          </button>
+
+
+
+
                         </>
                       )}
 
                       {emergency.status === 'acknowledged' && (
-                        <button
-                          onClick={() => openRespondModal(emergency)}
-                          className="text-purple-400 hover:text-purple-300 transition-colors"
-                          title="Start Response"
-                        >
-                          <PlayCircle size={18} />
-                        </button>
+                        <>
+                            <button
+                            onClick={() => openRespondModal(emergency)}
+                            className="text-purple-400 hover:text-purple-300 transition-colors"
+                            title="Start Response"
+                          >
+                            <PlayCircle size={18} />
+                          </button>
+                          
+                          <button
+                            onClick={() => setActiveChat(emergency)}
+                            className="text-green-400 hover:text-green-300 transition-colors"
+                            title="Chat with Reporter"
+                          >
+                              <MessageSquare size={18} />
+                            </button>
+                          
+                          </>
+
+                        
                       )}
 
                       {(emergency.status === 'responding' || emergency.status === 'acknowledged') && (
-                        <button
-                          onClick={() => handleResolve(emergency._id)}
-                          className="text-green-400 hover:text-green-300 transition-colors"
-                          title="Mark as Resolved"
-                        >
-                          <CheckCircle size={18} />
-                        </button>
+                        <>
+                            <button
+                            onClick={() => handleResolve(emergency._id)}
+                            className="text-green-400 hover:text-green-300 transition-colors"
+                            title="Mark as Resolved"
+                          >
+                            <CheckCircle size={18} />
+                          </button><button
+                            onClick={() => setActiveChat(emergency)}
+                            className="text-green-400 hover:text-green-300 transition-colors"
+                            title="Chat with Reporter"
+                          >
+                              <MessageSquare size={18} />
+                            </button>
+                        </>
+
                       )}
 
                       {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
@@ -637,7 +636,7 @@ export default function EmergencyManagement() {
                         </button>
                       )}
 
-                      {(session?.user?.role === 'admin') && (
+                      {(session?.user?.role === 'system-admin') && (
                         <button
                           onClick={() => handleDelete(emergency._id)}
                           className="text-red-400 hover:text-red-300 transition-colors"
@@ -961,6 +960,8 @@ export default function EmergencyManagement() {
                         <CheckCircle size={18} />
                         Acknowledge
                       </button>
+                 
+
                       <button
                         onClick={() => {
                           closeModal();
@@ -1013,8 +1014,20 @@ export default function EmergencyManagement() {
           </div>
         </div>
       )}
+      // At the bottom of your return() JSX:
+{activeChat && (
+  <ChatModal 
+    emergency={activeChat} 
+    onClose={() => setActiveChat(null)} 
+    currentUser={session?.user} 
+  />
+)}
+
     </div>
   );
+
+  
+  
 }
 
 // Helper Components
@@ -1042,3 +1055,5 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       { phone: body.phone },
       {
         $set: {
-          name: body.name,
+          fName: body.fName,
           currentLocation: {
             latitude: body.location.latitude,
             longitude: body.location.longitude,

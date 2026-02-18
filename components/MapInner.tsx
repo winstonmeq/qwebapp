@@ -104,7 +104,7 @@ export default function MapInner({ emergencies, users, center }: EmergencyMapPro
             key={`user-${u._id}`} 
             position={[u.currentLocation.latitude, u.currentLocation.longitude]}
           >
-             <Popup><div className="text-xs font-bold">{u.name}</div></Popup>
+             <Popup><div className="text-xs font-bold">{u.fName}</div></Popup>
           </Marker>
         ))}
       </MapContainer>

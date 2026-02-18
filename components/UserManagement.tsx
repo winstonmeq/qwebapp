@@ -26,7 +26,7 @@ interface User {
   name: string;
   email: string;
   phone: string;
-  role: 'user' | 'admin' | 'responder';
+  role: 'user' | 'system-admin' | 'responder';
   isActive: boolean;
   lastSeen: Date;
   createdAt: Date;
@@ -52,7 +52,7 @@ export default function UserManagement() {
     email: '',
     phone: '',
     password: '',
-    role: 'user' as 'user' | 'admin' | 'responder',
+    role: 'user' as 'user' | 'system-admin' | 'responder',
     isActive: true,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -311,7 +311,7 @@ export default function UserManagement() {
   const stats = {
     total: users.length,
     active: users.filter(u => u.isActive).length,
-    admins: users.filter(u => u.role === 'admin').length,
+    admins: users.filter(u => u.role === 'system-admin').length,
     responders: users.filter(u => u.role === 'responder').length,
     users: users.filter(u => u.role === 'user').length,
   };

@@ -1,33 +1,23 @@
 import mongoose, { Schema, Model, Document } from 'mongoose';
 
 /**
- * Location Schema for User
- */
-const LocationSchema = new Schema(
-  {
-    latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true },
-    accuracy: { type: Number },
-    timestamp: { type: Date, default: Date.now },
-  },
-  { _id: false } // Prevents creating an _id for subdocument
-);
-
-/**
  * User Document Interface
  */
 export interface IUser extends Document {
+  lguCode: string;
   name: string;
   email: string;
-  password: string;
+  image?: string;
+  googleId?: string;
   phone: string;
-  role: 'user' | 'admin' | 'responder';
-  currentLocation?: {
-    latitude: number;
-    longitude: number;
-    accuracy?: number;
-    timestamp: Date;
-  };
+  // --- NEW FIELDS ADDED HERE ---
+  sex?: 'Male' | 'Female' | 'Other';
+  age?: number;
+  province?: string;
+  municipality?: string;
+  barangay?: string;
+  // -----------------------------
+  role: 'user' | 'responder' | 'system-admin';
   isActive: boolean;
   lastSeen: Date;
   emailVerified?: Date;
@@ -40,12 +30,22 @@ export interface IUser extends Document {
  */
 const UserSchema = new Schema<IUser>(
   {
+    lguCode: { type: Schema.Types.String, ref: 'LGU', required: false },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    phone: { type: String, required: true, unique: true },
-    role: { type: String, enum: ['user', 'admin', 'responder'], default: 'user' },
-    currentLocation: { type: LocationSchema },
+    image: { type: String },
+    googleId: { type: String, unique: true, sparse: true },
+    phone: { type: String, required: false, unique: true, sparse: true }, // Sparse allows multiple nulls
+    
+    // --- NEW SCHEMA FIELDS ---
+    sex: { type: String, enum: ['Male', 'Female', 'Other'], required: false },
+    age: { type: Number, required: false },
+    province: { type: String, required: false },
+    municipality: { type: String, required: false },
+    barangay: { type: String, required: false },
+    // -------------------------
+
+    role: { type: String, enum: ['user', 'responder', 'system-admin'], default: 'user' },
     isActive: { type: Boolean, default: true },
     lastSeen: { type: Date, default: Date.now },
     emailVerified: { type: Date },
@@ -56,14 +56,12 @@ const UserSchema = new Schema<IUser>(
 /**
  * Indexes for Performance
  */
-// UserSchema.index({ email: 1 });
-// UserSchema.index({ phone: 1 });
-// UserSchema.index({ isActive: 1 });
-// UserSchema.index({ role: 1 });
+UserSchema.index({ isActive: 1 });
+UserSchema.index({ role: 1 });
+UserSchema.index({ lguCode: 1, email: 1 });
+// Add an index for location-based reporting
+UserSchema.index({ municipality: 1, barangay: 1 });
 
-/**
- * Model - prevents OverwriteModelError in Next.js Hot Reload
- */
 const UserModel: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export default UserModel;

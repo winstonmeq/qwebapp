@@ -13,7 +13,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
-    } else if (session?.user?.role !== 'admin') {
+    } else if (session?.user?.role !== 'system-admin') {
       router.push('/');
     }
   }, [session, status, router]);
@@ -26,7 +26,7 @@ export default function SettingsPage() {
     );
   }
 
-  if (!session || session.user.role !== 'admin') {
+  if (!session || session.user.role !== 'system-admin') {
     return null;
   }
 
