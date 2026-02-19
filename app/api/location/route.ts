@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import UserModel from '@/models/User';
 
+
+
+// POST - Update or create user location use to track active users like responders in the field. The Flutter app will send location updates here.
+
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
@@ -12,7 +16,7 @@ export async function POST(request: NextRequest) {
       { phone: body.phone },
       {
         $set: {
-          fName: body.fName,
+          name: body.name,
           currentLocation: {
             latitude: body.location.latitude,
             longitude: body.location.longitude,

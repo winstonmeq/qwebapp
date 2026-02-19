@@ -13,6 +13,11 @@ declare module "next-auth" {
     lguCode: string;
     image?: string;
     googleId?: string;
+    // Add the location structure here
+      location?: {
+        type: "Point";
+        coordinates: [number, number];
+      };
   }
 
   /**
@@ -27,6 +32,11 @@ declare module "next-auth" {
       googleId?: string;
       lguCode: string;
       phone: string;
+      // Add the location structure here
+      location?: {
+        type: "Point";
+        coordinates: [number, number];
+      };
     } & DefaultSession["user"]
   }
 }
@@ -39,5 +49,10 @@ declare module "next-auth/jwt" {
     image?: string;
     googleId?: string;
     name: string;
+    // Add the location structure here
+      location?: {
+        type: "Point";
+        coordinates: [number, number];
+      };
   }
 }

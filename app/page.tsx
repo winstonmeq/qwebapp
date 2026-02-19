@@ -1,9 +1,7 @@
 'use client';
-
+import { useRouter } from 'next/navigation'; // Added for redirection
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import EmergencyMap from '@/components/EmergencyMap';
-import StatsDashboard from '@/components/StatsDashboard';
 import { Emergency, User } from '@/types';
 import { Bell, RefreshCw, MapIcon, List, LogOut, User as UserIcon, Shield } from 'lucide-react';
 import NavigationMenu from '@/components/NavigationMenu';
@@ -11,7 +9,10 @@ import EmergencyManagement from '@/components/EmergencyManagement';
 import Link from 'next/link';
 
 export default function DashboardPage() {
+
+  
   const { data: session } = useSession();
+  const router = useRouter();
   const [emergencies, setEmergencies] = useState<Emergency[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,8 +23,14 @@ export default function DashboardPage() {
   const previousUsersRef = useRef<User[]>([]);
 
 
-
-
+// // --- UPDATED ROLE PROTECTION ---
+//   useEffect(() => {
+   
+//     // If session exists, check the role
+//     if (session?.user?.role === 'user') {
+//       router.push('/userpage');
+//     }
+//   }, [session, router]);
 
 
   const fetchEmergencies = useCallback(async () => {
@@ -205,7 +212,7 @@ export default function DashboardPage() {
             {/* <StatsDashboard emergencies={emergencies} users={users} /> */}
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 bg-gray-800 p-2 rounded-xl w-fit">
+            <div className="flex gap-2 bg-gray-700 p-2 px-4 rounded-xl w-fit">
               {/* <button
                 onClick={() => setSelectedTab('map')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
@@ -228,9 +235,9 @@ export default function DashboardPage() {
                 <List size={20} />
                 List View
               </button> */}
-              <Link href="/map" target="_blank" rel="noopener noreferrer">
-  Map
-</Link>
+              <Link href="/map" target="_blank" rel="noopener noreferrer" className='text-gray-200 font-bold hover:text-white'>
+                Map 
+              </Link>
             </div>
 
             {/* Content Area */}
@@ -241,7 +248,8 @@ export default function DashboardPage() {
                 </div>
               ) : ( */}
                 <div className="p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Active Emergencies</h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">Active Emergencies</h2>
+        
                       <EmergencyManagement />
 
                 </div>

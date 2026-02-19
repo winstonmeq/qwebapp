@@ -16,6 +16,8 @@ const Circle = dynamic(() => import('react-leaflet').then((mod) => mod.Circle), 
 interface EmergencyMapProps {
   emergencies: Emergency[];
   users: User[];
+  lat: number;
+  lng: number;
   center?: [number, number];
   alertUser?: User | null;
   clearAlert?: () => void;
@@ -24,7 +26,9 @@ interface EmergencyMapProps {
 export default function EmergencyMap2({
   emergencies,
   users,
-  center = [7.123, 125.123],
+  lat,
+  lng,
+  center = [lat, lng],
   alertUser,
   clearAlert,
 }: EmergencyMapProps) {
@@ -163,7 +167,7 @@ export default function EmergencyMap2({
       <MapContainer
         key="emergency-map-container"
         center={center}
-        zoom={10}
+        zoom={11}
         className="w-full h-full"
         style={{ background: '#1f2937' }}
       >

@@ -2,7 +2,6 @@
 import mongoose, { Schema, Model, Document } from 'mongoose';
 
 
-
 const LocationSchema = new Schema(
   {
     latitude: { type: Number, required: true },

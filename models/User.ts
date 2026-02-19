@@ -16,6 +16,13 @@ export interface IUser extends Document {
   province?: string;
   municipality?: string;
   barangay?: string;
+
+  // Geospatial Location (GeoJSON)
+  location?: {
+    type: 'Point';
+    coordinates: [number, number]; // [longitude, latitude]
+  };
+
   // -----------------------------
   role: 'user' | 'responder' | 'system-admin';
   isActive: boolean;
@@ -45,10 +52,26 @@ const UserSchema = new Schema<IUser>(
     barangay: { type: String, required: false },
     // -------------------------
 
+    // GeoJSON Point implementation
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // Index 0: Longitude, Index 1: Latitude
+        required: false,
+      },
+    },
+
+    // ------------------
+
     role: { type: String, enum: ['user', 'responder', 'system-admin'], default: 'user' },
     isActive: { type: Boolean, default: true },
     lastSeen: { type: Date, default: Date.now },
     emailVerified: { type: Date },
+    
   },
   { timestamps: true }
 );

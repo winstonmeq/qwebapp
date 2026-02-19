@@ -187,7 +187,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <main className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {loading ? (
           <div className="flex items-center justify-center h-96">
             <div className="text-white text-xl">Loading dashboard...</div>
@@ -202,8 +202,8 @@ export default function DashboardPage() {
             {/* Content Area */}
             <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
               
-                <div className="h-[600px]">
-                  <EmergencyMap2 emergencies={emergencies} users={users} />
+                <div className="h-[800px]">
+                  <EmergencyMap2 emergencies={emergencies} users={users} lat={session?.user?.location?.coordinates[1] ?? 0} lng={session?.user?.location?.coordinates[0] ?? 0} />
                 </div>
               
             </div>

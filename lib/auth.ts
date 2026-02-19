@@ -14,55 +14,55 @@ export const authOptions: NextAuthOptions = {
     }),
 
     // --- CREDENTIALS PROVIDER ---
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Please enter email and password');
-        }
+    // CredentialsProvider({
+    //   name: 'Credentials',
+    //   credentials: {
+    //     email: { label: 'Email', type: 'email' },
+    //     password: { label: 'Password', type: 'password' },
+    //   },
+    //   async authorize(credentials) {
+    //     if (!credentials?.email || !credentials?.password) {
+    //       throw new Error('Please enter email and password');
+    //     }
 
-        await connectDB();
+    //     await connectDB();
 
-        const user = await UserModel.findOne({ email: credentials.email });
+    //     const user = await UserModel.findOne({ email: credentials.email });
 
-        // FIX: Check if user exists AND if they actually have a password
-        if (!user) {
-          throw new Error('No user found with this email');
-        }
+    //     // FIX: Check if user exists AND if they actually have a password
+    //     if (!user) {
+    //       throw new Error('No user found with this email');
+    //     }
 
-        if (!user.password) {
-          throw new Error('This account was created using Google. Please sign in with Google.');
-        }
+    //     if (!user.password) {
+    //       throw new Error('This account was created using Google. Please sign in with Google.');
+    //     }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+    //     const isPasswordValid = await bcrypt.compare(
+    //       credentials.password,
+    //       user.password
+    //     );
 
-        if (!isPasswordValid) {
-          throw new Error('Invalid password');
-        }
+    //     if (!isPasswordValid) {
+    //       throw new Error('Invalid password');
+    //     }
 
-        // Update last seen
-        user.lastSeen = new Date();
-        await user.save();
+    //     // Update last seen
+    //     user.lastSeen = new Date();
+    //     await user.save();
 
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          phone: user.phone,
-          image: user.image,
-          googleId: user.googleId,
-          lguCode: user.lguCode || null,
-        } as any;
-      },
-    }),
+    //     return {
+    //       id: user._id.toString(),
+    //       email: user.email,
+    //       name: user.name,
+    //       role: user.role,
+    //       phone: user.phone,
+    //       image: user.image,
+    //       googleId: user.googleId,
+    //       lguCode: user.lguCode || null,
+    //     } as any;
+    //   },
+    // }),
   ],
   callbacks: {
     // This runs when a user signs in via OAuth (Google)
@@ -104,6 +104,7 @@ export const authOptions: NextAuthOptions = {
           token.phone = dbUser.phone;
           token.googleId = dbUser.googleId;
           token.lguCode = dbUser.lguCode;
+          token.location = dbUser.location; // Pass location from DB to JWT
         }
       }
       return token;
@@ -116,6 +117,7 @@ export const authOptions: NextAuthOptions = {
         session.user.phone = token.phone as string;
         session.user.googleId = token.googleId as string;
         session.user.lguCode = token.lguCode as string;
+        session.user.location = token.location as any; // Location is now in session
       }
       return session;
     },
