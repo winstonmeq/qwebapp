@@ -1014,7 +1014,6 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
           </div>
         </div>
       )}
-      // At the bottom of your return() JSX:
 {activeChat && (
   <ChatModal 
     emergency={activeChat} 

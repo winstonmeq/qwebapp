@@ -21,7 +21,7 @@ interface EmergencyMapProps {
   clearAlert?: () => void;
 }
 
-export default function EmergencyMap({
+export default function EmergencyMap2({
   emergencies,
   users,
   center = [7.123, 125.123],

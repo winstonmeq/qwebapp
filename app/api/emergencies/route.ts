@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import EmergencyModel from '@/models/Emergency';
+import { authOptions } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,6 +53,14 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+
     await connectDB();
     
     const { searchParams } = new URL(request.url);

@@ -2,13 +2,11 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import EmergencyMap from '@/components/EmergencyMap';
+import EmergencyMap2 from '@/components/EmergencyMap2';
 import StatsDashboard from '@/components/StatsDashboard';
 import { Emergency, User } from '@/types';
 import { Bell, RefreshCw, MapIcon, List, LogOut, User as UserIcon, Shield } from 'lucide-react';
 import NavigationMenu from '@/components/NavigationMenu';
-import EmergencyManagement from '@/components/EmergencyManagement';
-import Link from 'next/link';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -20,10 +18,6 @@ export default function DashboardPage() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [alertUser, setAlertUser] = useState<User | null>(null);
   const previousUsersRef = useRef<User[]>([]);
-
-
-
-
 
 
   const fetchEmergencies = useCallback(async () => {
@@ -114,8 +108,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 shadow-xl">
+       <header className="bg-gray-800 border-b border-gray-700 shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
@@ -123,8 +116,8 @@ export default function DashboardPage() {
                 <Bell className="text-white" size={32} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">
-                  Emergency Management System
+                <h1 className="font-bold text-white tracking-tight">
+                  {session?.user.lguCode} Emergency Management System
                 </h1>
                 <p className="text-gray-400 text-sm">Real-time emergency response and tracking</p>
               </div>
@@ -202,50 +195,17 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-4">
             {/* Statistics Dashboard */}
-            {/* <StatsDashboard emergencies={emergencies} users={users} /> */}
+            <StatsDashboard emergencies={emergencies} users={users} />
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 bg-gray-800 p-2 rounded-xl w-fit">
-              {/* <button
-                onClick={() => setSelectedTab('map')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                  selectedTab === 'map'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                }`}
-              >
-                <MapIcon size={20} />
-                Map View
-              </button> */}
-              {/* <button
-                onClick={() => setSelectedTab('list')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                  selectedTab === 'list'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                }`}
-              >
-                <List size={20} />
-                List View
-              </button> */}
-              <Link href="/map" target="_blank" rel="noopener noreferrer">
-  Map
-</Link>
-            </div>
-
+        
             {/* Content Area */}
             <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-              {/* {selectedTab === 'map' ? (
+              
                 <div className="h-[600px]">
-                  <EmergencyMap emergencies={emergencies} users={users} />
+                  <EmergencyMap2 emergencies={emergencies} users={users} />
                 </div>
-              ) : ( */}
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Active Emergencies</h2>
-                      <EmergencyManagement />
-
-                </div>
-              {/* )} */}
+              
             </div>
           </div>
         )}
