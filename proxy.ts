@@ -24,7 +24,7 @@ export default withAuth(
     }
 
      // 4. Role-based access control for Admin routes
-    if (token?.role == 'user') {
+    if (token && token?.role == 'user') {
       return NextResponse.redirect(new URL('/unauthorized', req.url));
     }
 

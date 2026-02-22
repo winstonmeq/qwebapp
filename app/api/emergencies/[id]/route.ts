@@ -7,7 +7,6 @@ import { getServerSession } from 'next-auth';
 
 export async function PATCH(
   request: NextRequest,
-  // { params }: { params: { id: string } }
   context: { params: Promise<{ id: string }> }
 
 ) {
@@ -85,7 +84,7 @@ export async function PATCH(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -97,9 +96,10 @@ export async function GET(
       }, { status: 401 });
     }
 
+    const { id } = await context.params;
     await connectDB();
     
-    const emergency = await EmergencyModel.findById(params.id);
+    const emergency = await EmergencyModel.findById(id);
 
     if (!emergency) {
       return NextResponse.json({

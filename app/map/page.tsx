@@ -6,7 +6,7 @@ import EmergencyMap2 from '@/components/EmergencyMap2';
 import StatsDashboard from '@/components/StatsDashboard';
 import { Emergency, User } from '@/types';
 import { Bell, RefreshCw, MapIcon, List, LogOut, User as UserIcon, Shield } from 'lucide-react';
-import NavigationMenu from '@/components/NavigationMenu';
+import NavigationMenuMap from '@/components/NavigationMenuMap';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -123,7 +123,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <NavigationMenu userRole={session?.user?.role || 'user'} />
+            <NavigationMenuMap userRole={session?.user?.role || 'user'} />
 
 
             <div className="flex items-center gap-4">

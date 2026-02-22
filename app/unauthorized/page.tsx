@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 export default function UnauthorizedPage() {
   return (
@@ -20,13 +21,19 @@ export default function UnauthorizedPage() {
             You don't have permission to access this page. This area is restricted to administrators only.
           </p>
 
-          <Link
+          {/* <Link
             href="/"
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             <ArrowLeft size={20} />
             Back to Dashboard
-          </Link>
+          </Link> */}
+            <button
+                      onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                       <ArrowLeft size={20} />Back to Sign In
+                    </button>
         </div>
       </div>
     </div>

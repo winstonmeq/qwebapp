@@ -60,7 +60,12 @@ export async function POST(request: NextRequest) {
         name: user.name,
         email: user.email,
         role: user.role,
-        image: user.image
+        image: user.image,
+        phone: user.phone ?? '',
+        lguCode: user.lguCode ?? '',
+        municipality: user.municipality ?? '',
+        barangay: user.barangay ?? '',
+        province: user.province ?? '',
       },
     }, { status: 200 });
 

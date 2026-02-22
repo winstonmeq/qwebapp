@@ -6,7 +6,7 @@ import UserModel from '@/models/User';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,10 +18,11 @@ export async function PATCH(
       }, { status: 401 });
     }
 
+    const { id } = await context.params;
     await connectDB();
 
     const body = await request.json();
-    const userId = params.id;
+    const userId = id;
 
     const user = await UserModel.findByIdAndUpdate(
       userId,
@@ -51,7 +52,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -63,9 +64,11 @@ export async function DELETE(
       }, { status: 401 });
     }
 
+
+    const { id } = await context.params;
     await connectDB();
 
-    const userId = params.id;
+    const userId = id;
 
     // Don't allow deleting yourself
     if (userId === session.user.id) {

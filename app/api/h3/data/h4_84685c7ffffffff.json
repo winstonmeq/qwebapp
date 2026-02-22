@@ -1,0 +1,107 @@
+{
+  "lgu": [
+    {
+      "lguName": "City of Kidapawan",
+      "parent_hex6": "86685c717ffffff",
+      "online": {
+        "paid": true,
+        "munId": "687f7dc00a193d8c3d2f40d9",
+        "provId": "687f788a0a193d8c3d2f40bb"
+      },
+      "hex_list": [
+        "88685c71d5fffff",
+        "88685c71abfffff",
+        "88685c71ebfffff",
+        "88685c7181fffff",
+        "88685c71c1fffff",
+        "88685c71b5fffff",
+        "88685c71a9fffff"
+      ],
+      "localhotlines": {
+        "bdrrmo": "09089217888"
+      },
+      "hotlines": [
+        {
+          "name": "MDRRMO",
+          "address": "Poblacion, Kidapawan City",
+          "contact": "09089217888",
+          "coordinates": [7.0087899, 125.0918493]
+        },
+        {
+          "name": "Police",
+          "address": "Poblacion, Kidapawan City",
+          "contact": "09398127169",
+          "coordinates": [7.0076206, 125.0912841]
+        },
+        {
+          "name": "Fire",
+          "address": "Magsaysay, Kidapawan City",
+          "contact": "09635866411",
+          "coordinates": [7.0134925, 125.0671693]
+        }
+      ],
+      "hospitals": [
+       
+        {
+          "name": "Kidapawan City Hospital",
+          "address": "National Highway Rd, Kidapawan City",
+          "contact": "0645775029",
+          "coordinates": [7.0082535, 125.0887983]
+        }
+       
+      ]
+    },
+    {
+      "lguName": "President Roxas",
+      "online": {
+        "paid": true,
+        "munId": "687f7dc00a193d8c3d2f4039",
+        "provId": "687f788a0a193d8c3d2f40bb"
+      },
+      "hex_list": [
+        "88685c720dfffff",
+        "88685c7205fffff",
+        "88685c7205fffff"
+
+
+      ],
+      "localhotlines": {
+        "bdrrmo": "1222332323"
+      },
+      "hotlines": [
+        {
+          "name": "MDRRMO",
+          "address": "Poblacion, President Roxas",
+          "contact": "09089417888",
+          "coordinates": [7.2087899, 125.0928493]
+        },
+        {
+          "name": "Police",
+          "address": "Poblacion, President Roxas",
+          "contact": "09398227169",
+          "coordinates": [7.0276206, 125.0922841]
+        },
+        {
+          "name": "Fire",
+          "address": "Poblacion, President Roxas",
+          "contact": "09632866411",
+          "coordinates": [7.0234925, 125.0671623]
+        }
+      ],
+      "hospitals": [
+        {
+          "name": "New Cebu Hospital",
+          "address": "Ilomavis Tourist Rd, Antipas City",
+          "contact": "0645774553",
+          "coordinates": [7.0217285, 125.0935836]
+        },
+        {
+          "name": "Rural Health Unit",
+          "address": "Poblacion, President Roxas",
+          "contact": "0645726018",
+          "coordinates": [7.0213013, 125.0897208]
+        }
+      ]
+    }
+  ]
+}

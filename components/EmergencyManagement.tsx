@@ -21,11 +21,19 @@ import {
   Clock,
   Activity,
   MessageSquare,
-  X
+  ShieldAlert, 
+  Flame, 
+  Mountain, 
+  Waves, 
+  Ambulance, 
+  Stethoscope, 
+  X,
+  LucideIcon
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import ChatModal from './ChatModal';
 import { Emergency } from '@/types'; 
+
 
 export default function EmergencyManagement() {
   const { data: session } = useSession();
@@ -113,6 +121,22 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
 
     setFilteredEmergencies(filtered);
   };
+
+
+// Define a type for your allowed emergency keys
+type EmergencyType = 'police' | 'fire' | 'landslide' | 'flood' | 'ambulance' | 'medical';
+
+// Map the keys to LucideIcon components
+const emergencyIcons: Record<EmergencyType | 'default', LucideIcon> = {
+  police: ShieldAlert,
+  fire: Flame,
+  landslide: Mountain,
+  flood: Waves,
+  ambulance: Ambulance,
+  medical: Stethoscope,
+  default: AlertTriangle,
+};
+
 
   const handleAcknowledge = async (emergencyId: string, formData?: any) => {
     try {
@@ -302,7 +326,8 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
       ...filteredEmergencies.map(e => [
         new Date(e.createdAt).toLocaleString(),
         e.userName,
-        e.userPhone,
+        e.userPhone, 
+        e.lguCode,
         e.emergencyType,
         e.severity,
         e.status,
@@ -329,6 +354,17 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
     return colors[severity] || 'bg-gray-500';
   };
 
+  // Define the specific Tailwind classes for each type
+const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
+  police: 'bg-blue-600',      // Blue for Police
+  fire: 'bg-orange-600',       // Orange/Red for Fire
+  landslide: 'bg-stone-600',   // Brown/Grey for Earth
+  flood: 'bg-cyan-600',        // Cyan/Blue for Water
+  ambulance: 'bg-red-600',     // Red for Medical Emergency
+  medical: 'bg-emerald-600',   // Green for Clinical/Medical
+  default: 'bg-gray-600',
+};
+
   const getStatusBadge = (status: string) => {
     const badges: Record<string, string> = {
       pending: 'bg-yellow-500',
@@ -349,7 +385,7 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
     critical: emergencies.filter(e => e.severity === 'critical').length,
   };
 
-  const emergencyTypes = ['all', 'medical', 'fire', 'crime', 'accident', 'natural-disaster', 'other'];
+  const emergencyTypes = ['all', 'medical', 'fire', 'police', 'flood', 'landslide', 'ambulance'];
 
   if (loading) {
     return (
@@ -463,7 +499,7 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                   Reporter
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Type
+                 Location
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Severity
@@ -482,21 +518,28 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
             <tbody className="divide-y divide-gray-700">
               {filteredEmergencies.map((emergency) => (
                 <tr key={emergency._id} className="hover:bg-gray-750 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${getSeverityColor(emergency.severity)}`}>
-                        <AlertTriangle className="text-white" size={20} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white capitalize">
-                          {emergency.emergencyType.replace('-', ' ')}
-                        </p>
-                        {/* <p className="text-xs text-gray-400 line-clamp-2 max-w-xs">
-                          {emergency.description}
-                        </p> */}
-                      </div>
+               
+              <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-start gap-3">
+                    {/* Use the type-based color mapper here */}
+                    <div className={`p-2 rounded-lg ${emergencyTypeColors[emergency.emergencyType.toLowerCase() as EmergencyType] || emergencyTypeColors.default}`}>
+                      {(() => {
+                        const type = emergency.emergencyType.toLowerCase() as EmergencyType;
+                        const IconComponent = emergencyIcons[type] || emergencyIcons.default;
+                        return <IconComponent className="text-white" size={20} />;
+                      })()}
                     </div>
-                  </td>
+                    
+                    <div>
+                      <p className="text-sm font-medium text-white capitalize">
+                        {emergency.emergencyType.replace('-', ' ')}
+                      </p>
+                    
+                    </div>
+                  </div>
+                </td>
+
+
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <User size={14} className="text-gray-400" />
@@ -523,7 +566,9 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-3 py-1 text-xs font-semibold text-white bg-gray-700 rounded-full capitalize">
-                      {emergency.emergencyType.replace('-', ' ')}
+                      {/* {emergency.emergencyType.replace('-', ' ')} */}
+                      {emergency.lguCode}
+
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -552,6 +597,14 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                         <Eye size={18} />
                       </button>
 
+                       <button
+                            onClick={() => setActiveChat(emergency)}
+                            className="text-green-400 hover:text-green-300 transition-colors"
+                            title="Chat with Reporter"
+                          >
+                            <MessageSquare size={18} />
+                          </button>
+{/* 
                       {emergency.status === 'pending' && (
                         <>
                           <button
@@ -570,21 +623,15 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                           </button>
 
          
-                            <button
-                            onClick={() => setActiveChat(emergency)}
-                            className="text-green-400 hover:text-green-300 transition-colors"
-                            title="Chat with Reporter"
-                          >
-                            <MessageSquare size={18} />
-                          </button>
+                           
 
 
 
 
                         </>
-                      )}
+                      )} */}
 
-                      {emergency.status === 'acknowledged' && (
+                      {/* {emergency.status === 'acknowledged' && (
                         <>
                             <button
                             onClick={() => openRespondModal(emergency)}
@@ -605,8 +652,8 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                           </>
 
                         
-                      )}
-
+                      )} */}
+{/* 
                       {(emergency.status === 'responding' || emergency.status === 'acknowledged') && (
                         <>
                             <button
@@ -624,9 +671,9 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                             </button>
                         </>
 
-                      )}
+                      )} */}
 
-                      {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
+                      {/* {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
                         <button
                           onClick={() => handleCancel(emergency._id)}
                           className="text-yellow-400 hover:text-yellow-300 transition-colors"
@@ -634,7 +681,7 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                         >
                           <XCircle size={18} />
                         </button>
-                      )}
+                      )} */}
 
                       {(session?.user?.role === 'system-admin') && (
                         <button
@@ -839,35 +886,6 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                     <p className="text-xs text-gray-400 mt-1">List equipment or resources being deployed</p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">
-                      Response Notes
-                    </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Add dispatch notes, instructions, or special considerations..."
-                      rows={4}
-                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-                    />
-                    <p className="text-xs text-gray-400 mt-1">Document response plan or special instructions</p>
-                  </div>
-
-                  <div className="bg-purple-600 bg-opacity-10 border border-purple-600 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <PlayCircle className="text-purple-400 mt-0.5 flex-shrink-0" size={20} />
-                      <div className="text-sm text-gray-300">
-                        <p className="font-semibold text-purple-400 mb-1">Initiating response will:</p>
-                        <ul className="space-y-1 text-xs">
-                          <li>• Mark status as "Responding"</li>
-                          <li>• Dispatch notification to reporter with ETA</li>
-                          <li>• Start response timer and tracking</li>
-                          <li>• Alert nearby units if needed</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="flex gap-3 pt-4 border-t border-gray-700">
                     <button
                       onClick={closeModal}
@@ -975,7 +993,7 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                     </>
                   )}
 
-                  {selectedEmergency.status === 'acknowledged' && (
+                  {/* {selectedEmergency.status === 'acknowledged' && (
                     <button
                       onClick={() => {
                         closeModal();
@@ -986,9 +1004,10 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                       <PlayCircle size={18} />
                       Start Response
                     </button>
-                  )}
+                  )} */}
 
                   {(selectedEmergency.status === 'responding' || selectedEmergency.status === 'acknowledged') && (
+                    <div>
                     <button
                       onClick={() => {
                         handleResolve(selectedEmergency._id);
@@ -999,6 +1018,10 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
                       <CheckCircle size={18} />
                       Mark as Resolved
                     </button>
+
+                    
+                    </div>
+                    
                   )}
 
                   <button

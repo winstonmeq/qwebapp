@@ -5,6 +5,72 @@ import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 
 
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    await connectDB();
+    
+    // Initialize query
+    let query: any = {};
+
+    /**
+     * ROLE-BASED ACCESS CONTROL (RBAC) LOGIC:
+     * 1. system-admin: Sees everything (lguCode remains empty in query)
+     * 2. responder (or any other role): Must be filtered by their specific lguCode
+     */
+    if (session.user.role === 'system-admin') {
+      // Logic: Leave query.lguCode undefined to fetch all records across all LGUs
+    } else {
+      // Logic: For responders or LGU-admins, enforce the lguCode filter
+      if (!session.user.lguCode) {
+        return NextResponse.json(
+          { success: false, error: 'Access denied: No LGU Code assigned to your account' }, 
+          { status: 403 }
+        );
+      }
+      query.lguCode = session.user.lguCode;
+    }
+
+    // ─── Extract Search Params ──────────────────────────────────────────────
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const limit = parseInt(searchParams.get('limit') || '50');
+
+    // Add status filter if provided in the URL
+    if (status) {
+      query.status = status;
+    }
+
+    // ─── Execute Database Query ─────────────────────────────────────────────
+    const emergencies = await EmergencyModel
+      .find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit);
+
+    return NextResponse.json({
+      success: true,
+      count: emergencies.length,
+      data: emergencies,
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching emergencies:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+    }, { status: 500 });
+  }
+}
+
+
+
+
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
@@ -18,6 +84,8 @@ export async function POST(request: NextRequest) {
     if (isNaN(longitude) || isNaN(latitude)) {
       return NextResponse.json({ success: false, error: 'Invalid coordinates' }, { status: 400 });
     }
+
+    console.log('Creating emergency with data:', body);
     
     const emergency = new EmergencyModel({
       lguCode: body.lguCode, // IMPORTANT: Required by your model
@@ -44,47 +112,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (error: any) {
     console.error('Error creating emergency:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-    }, { status: 500 });
-  }
-}
-
-export async function GET(request: NextRequest) {
-  try {
-
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
-
-    await connectDB();
-    
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const lguCode = searchParams.get('lguCode'); // Added lguCode filter
-    const limit = parseInt(searchParams.get('limit') || '50');
-
-    // Build dynamic query
-    const query: any = {};
-    if (status) query.status = status;
-    if (lguCode) query.lguCode = lguCode;
-    
-    const emergencies = await EmergencyModel
-      .find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit);
-
-    return NextResponse.json({
-      success: true,
-      count: emergencies.length,
-      data: emergencies,
-    });
-  } catch (error: any) {
-    console.error('Error fetching emergencies:', error);
     return NextResponse.json({
       success: false,
       error: error.message,

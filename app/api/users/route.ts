@@ -4,35 +4,89 @@ import UserModel from '@/models/User';
 import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 
+
+
 // GET - Fetch users (Security: System Admin sees all, Others see only their LGU)
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
+    // 1. Authentication Check
     if (!session) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectDB();
 
-    let query = {};
-    // If not a system-admin, filter by the admin's lguCode
-    if (session.user.role !== 'system-admin') {
+    /**
+     * MULTI-TENANCY SECURITY LOGIC
+     * This prevents users from one LGU from seeing users of another LGU.
+     */
+    let query: any = {};
+
+    if (session.user.role === 'system-admin') {
+      // System Admins have a global view: query stays empty {}
+    } else {
+      // All other roles (Responders, LGU Admins, etc.) must be filtered
       if (!session.user.lguCode) {
-        return NextResponse.json({ success: false, error: 'LGU Code missing from session' }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: 'Access Denied: Your account is not assigned to an LGU.' }, 
+          { status: 403 }
+        );
       }
-      query = { lguCode: session.user.lguCode };
+      query.lguCode = session.user.lguCode;
     }
 
+    // 2. Database Fetch
     const users = await UserModel.find(query)
-      .select('-password') // Safety precaution even if empty
+      .select('-password') // Never send passwords to the client
       .sort({ createdAt: -1 });
 
-    return NextResponse.json({ success: true, data: users });
+    return NextResponse.json({ 
+      success: true, 
+      count: users.length, 
+      data: users 
+    });
+
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('Error fetching users:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error.message 
+    }, { status: 500 });
   }
 }
+
+//original code without the multi-tenancy security logic:
+// GET - Fetch users (Security: System Admin sees all, Others see only their LGU)
+// export async function GET(request: NextRequest) {
+//   try {
+//     const session = await getServerSession(authOptions);
+
+//     if (!session) {
+//       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+//     }
+
+//     await connectDB();
+
+//     let query = {};
+//     // If not a system-admin, filter by the admin's lguCode
+//     if (session.user.role !== 'system-admin') {
+//       if (!session.user.lguCode) {
+//         return NextResponse.json({ success: false, error: 'LGU Code missing from session' }, { status: 403 });
+//       }
+//       query = { lguCode: session.user.lguCode };
+//     }
+
+//     const users = await UserModel.find(query)
+//       .select('-password') // Safety precaution even if empty
+//       .sort({ createdAt: -1 });
+
+//     return NextResponse.json({ success: true, data: users });
+//   } catch (error: any) {
+//     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+//   }
+// }
 
 // POST - Create user (Admin only - Google users usually self-register, but this is for manual entry)
 export async function POST(request: NextRequest) {

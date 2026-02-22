@@ -9,6 +9,7 @@ export interface Location {
 // /types/index.ts
 
 export interface Emergency {
+  [x: string]: any;
   _id: string;
   userId: string;
   userName: string;
