@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
 // Connect to your custom server.js
-const socket = io("http://localhost:3000", {
+const socket = io("https://ems.qalertapp.com", {
   path: "/socket.io",
 });
 

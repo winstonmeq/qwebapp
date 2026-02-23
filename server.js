@@ -28,7 +28,7 @@ app.prepare().then(async () => {
   // Initialize Socket.IO
   const io = new Server(server, {
     cors: {
-      origin: "*", // Change this to your specific domain in production
+      origin: "https://ems.qalertapp.com", // Change this to your specific domain in production
       methods: ["GET", "POST"],
     },
     path: "/socket.io",
@@ -83,7 +83,7 @@ app.prepare().then(async () => {
   // Make io globally accessible if needed
   global.io = io;
 
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 3001;
   server.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
