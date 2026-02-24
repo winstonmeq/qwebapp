@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("ts-node").register();
 const next = require("next");
 const http = require("http");
 const { Server } = require("socket.io");
