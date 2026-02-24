@@ -3,6 +3,8 @@ import connectDB from '@/lib/mongodb';
 import EmergencyModel from '@/models/Emergency';
 import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 
 
@@ -105,6 +107,24 @@ export async function POST(request: NextRequest) {
     });
 
     await emergency.save();
+
+    try {
+  // We write to a "notifications" collection in Firestore
+  // The dashboard will be listening to this.
+  await setDoc(doc(db, "notifications", emergency.lguCode), {
+    lastIncidentId: emergency._id.toString(),
+    timestamp: Date.now(),
+    type: emergency.emergencyType
+  });
+} catch (e) {
+  console.error("Firebase sync failed", e);
+}
+
+
+
+
+
+
 
     return NextResponse.json({
       success: true,

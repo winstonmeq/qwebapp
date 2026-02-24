@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
+
+const URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 // Connect to your custom server.js
-const socket = io("https://ems.qalertapp.com", {
+const socket = io(URL, {
   path: "/socket.io",
 });
 

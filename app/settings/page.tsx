@@ -186,7 +186,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-400 mt-1">Base URL for API requests</p>
               </div>
               <code className="px-3 py-1 bg-gray-900 text-green-400 text-xs rounded font-mono">
-                {process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}
+                {process.env.NEXT_PUBLIC_APP_URL}
               </code>
             </div>
 

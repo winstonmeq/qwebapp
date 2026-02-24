@@ -28,7 +28,7 @@ app.prepare().then(async () => {
   // Initialize Socket.IO
   const io = new Server(server, {
     cors: {
-      origin: "https://ems.qalertapp.com", // Change this to your specific domain in production
+      origin: process.env.NEXT_PUBLIC_APP_URL, // Change this to your specific domain in production
       methods: ["GET", "POST"],
     },
     path: "/socket.io",

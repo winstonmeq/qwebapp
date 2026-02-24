@@ -35,7 +35,12 @@ import ChatModal from './ChatModal';
 import { Emergency } from '@/types'; 
 
 
-export default function EmergencyManagement() {
+interface EmergencyManagementProps {
+  refreshTrigger?: number;
+}
+
+
+export default function EmergencyManagement({ refreshTrigger }: EmergencyManagementProps) {
   const { data: session } = useSession();
   const [emergencies, setEmergencies] = useState<Emergency[]>([]);
   const [filteredEmergencies, setFilteredEmergencies] = useState<Emergency[]>([]);
@@ -61,7 +66,11 @@ export default function EmergencyManagement() {
 const [activeChat, setActiveChat] = useState<Emergency | null>(null);
 
 
-
+ useEffect(() => {
+    if (refreshTrigger && refreshTrigger > 0) {
+     fetchEmergencies(); // 👈 replace with your actual fetch function name inside EmergencyManagement
+    }
+  }, [refreshTrigger]);
 
 
 
