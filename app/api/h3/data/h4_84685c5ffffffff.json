@@ -1,6 +1,7 @@
 {
   "lgu": [
     {
+      "barName":"Matalam",
       "lguName": "Matalam",
       "online": {
         "paid": true,
@@ -64,6 +65,7 @@
 
 
     {
+      "barName":"Kabacan",
       "lguName": "Kabacan",
       "online": {
         "paid": true,

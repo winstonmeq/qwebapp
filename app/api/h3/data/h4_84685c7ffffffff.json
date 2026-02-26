@@ -1,8 +1,8 @@
 {
   "lgu": [
     {
+      "barName":"City of Kidapawan",
       "lguName": "City of Kidapawan",
-      "parent_hex6": "86685c717ffffff",
       "online": {
         "paid": true,
         "munId": "687f7dc00a193d8c3d2f40d9",
@@ -51,7 +51,11 @@
        
       ]
     },
+
+
+
     {
+      "barName":"President Roxas",
       "lguName": "President Roxas",
       "online": {
         "paid": true,
