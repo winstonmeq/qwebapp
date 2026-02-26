@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import NewsModel from '@/models/News'; // adjust path as needed
+import { notifyByLguCode } from '@/lib/fcmNotify';
 
 // GET /api/news — fetch all news with optional filters
 export async function GET(request: NextRequest) {
@@ -69,6 +70,18 @@ export async function POST(request: NextRequest) {
     });
 
     await news.save();
+
+
+      // ✅ Notify users only when published (not draft)
+    if (news.status === 'published' && news.lguCode) {
+      notifyByLguCode(
+        news.lguCode,
+        news.title,
+        news.summary || 'New update from your local government.',
+        { newsId: news._id.toString(), category: news.category }
+      ).catch((err) => console.error('FCM notify failed:', err)); // non-blocking
+    }
+    
 
     return NextResponse.json({ success: true, data: news }, { status: 201 });
   } catch (error: any) {
