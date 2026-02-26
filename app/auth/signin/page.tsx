@@ -137,23 +137,23 @@ export default function SignInPage() {
           </form>
 
           {/* Footer */}
-          <div className="mt-6 text-center">
+          {/* <div className="mt-6 text-center">
             <p className="text-gray-600 text-sm">
               Don't have an account?{' '}
               <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
                 Sign Up
               </Link>
             </p>
-          </div>
+          </div> */}
 
           {/* Seed Data References */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+          {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">Seed Credentials:</p>
             <div className="space-y-1">
                <p className="text-xs text-gray-600"><span className="font-semibold">Admin:</span> admin@admin.com / admin12345</p>
                <p className="text-xs text-gray-600"><span className="font-semibold">User:</span> clarence@example.com / Password123!</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

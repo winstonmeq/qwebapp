@@ -40,8 +40,9 @@ export async function PUT(
       sex, 
       age, 
       province, 
-      municipality, 
-      barangay, 
+      municipality,
+      lguCode, 
+      barangay,
       isActive,
       location // This is the new field coming from your Flutter app
     } = body;
@@ -56,6 +57,7 @@ export async function PUT(
       age,
       province,
       municipality,
+      lguCode,
       barangay,
       isActive: isActive ?? true,
       lastSeen: new Date(),
