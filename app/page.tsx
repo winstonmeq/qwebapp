@@ -1,4 +1,5 @@
 'use client';
+
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
@@ -14,31 +15,45 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [emergencies, setEmergencies] = useState<Emergency[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [alertUser, setAlertUser] = useState<User | null>(null);
-  const previousUsersRef = useRef<User[]>([]);
-
+  
   // Firebase alert state
   const [newIncidentAlert, setNewIncidentAlert] = useState(false);
   const [lastIncidentType, setLastIncidentType] = useState<string>('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const isFirstLoad = useRef(true);
+  const lastIncidentIdRef = useRef<string | null>(null);
 
-  // Audio ref
+  // Audio state
   const alertSoundRef = useRef<HTMLAudioElement | null>(null);
+  const [userInteracted, setUserInteracted] = useState(false);
 
   // ─── Initialize Audio ───────────────────────────────────────────────────────
-
   useEffect(() => {
-    alertSoundRef.current = new Audio('/sounds/alert.wav');
-    alertSoundRef.current.volume = 1.0;
+    // Create audio object immediately
+    const audio = new Audio('/sounds/alert.wav');
+    audio.volume = 1.0;
+    audio.preload = 'auto';
+    alertSoundRef.current = audio;
   }, []);
 
-  // ─── Fetch Functions ────────────────────────────────────────────────────────
+  // Function to "Prime" audio on first click
+  const handleInteraction = () => {
+    if (alertSoundRef.current && !userInteracted) {
+      alertSoundRef.current.play()
+        .then(() => {
+          alertSoundRef.current?.pause();
+          alertSoundRef.current!.currentTime = 0;
+          setUserInteracted(true);
+          console.log("🔊 Audio Unlocked");
+        })
+        .catch(e => console.log("Interaction required to unlock audio"));
+    }
+  };
 
+  // ─── Fetch Functions ────────────────────────────────────────────────────────
   const fetchEmergencies = useCallback(async () => {
     try {
       const response = await fetch('/api/emergencies');
@@ -51,152 +66,66 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      const response = await fetch('/api/location?active=true');
-      const result = await response.json();
-
-      if (result.success) {
-        const newUsers = result.data;
-
-        newUsers.forEach((newUser: User) => {
-          const existing = previousUsersRef.current.find((u) => u._id === newUser._id);
-          if (!existing) {
-            setAlertUser(newUser);
-          } else if (
-            new Date(newUser.lastSeen).getTime() > new Date(existing.lastSeen).getTime()
-          ) {
-            setAlertUser(newUser);
-          }
-        });
-
-        previousUsersRef.current = newUsers;
-        setUsers(newUsers);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  }, []);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    await Promise.all([fetchEmergencies(), fetchUsers()]);
-    setLoading(false);
-  }, [fetchEmergencies, fetchUsers]);
-
-  // ─── Initial Load ───────────────────────────────────────────────────────────
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // ─── Auto-refresh every 30s (Firebase handles real-time, this is a fallback) ─
-
-  useEffect(() => {
-    if (!autoRefresh) return;
-    const interval = setInterval(() => {
-      fetchEmergencies();
-      fetchUsers();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [autoRefresh, fetchEmergencies, fetchUsers]);
+    fetchEmergencies().then(() => setLoading(false));
+  }, [fetchEmergencies]);
 
   // ─── Firebase Real-time Listener ────────────────────────────────────────────
-
   useEffect(() => {
     const userLguCode = session?.user?.lguCode;
-
     if (!userLguCode && session?.user?.role !== 'system-admin') return;
 
     const targetLgu = userLguCode || 'all';
     const notifRef = doc(db, 'notifications', targetLgu);
 
-    console.log('👂 Listening to Firestore: notifications/', targetLgu);
+    const unsubscribe = onSnapshot(notifRef, (snapshot) => {
+      if (!snapshot.exists()) return;
 
-    const unsubscribe = onSnapshot(
-      notifRef,
-      (snapshot) => {
-        if (!snapshot.exists()) return;
+      const data = snapshot.data();
+      const currentId = data.id || data.incidentId || JSON.stringify(data);
 
-        // Skip first emission (initial data on mount)
-        if (isFirstLoad.current) {
-          isFirstLoad.current = false;
-          console.log('⏭️ Skipping initial Firestore snapshot');
-          return;
-        }
+      if (isFirstLoad.current) {
+        isFirstLoad.current = false;
+        lastIncidentIdRef.current = currentId;
+        return;
+      }
 
-        const data = snapshot.data();
-        console.log('🚨 New incident detected from Firestore:', data);
-
+      if (currentId !== lastIncidentIdRef.current) {
+        lastIncidentIdRef.current = currentId;
         setLastIncidentType(data?.type || 'Emergency');
         setNewIncidentAlert(true);
         setRefreshTrigger((prev) => prev + 1);
         fetchEmergencies();
 
-        // 🔊 Play alert sound
-        if (alertSoundRef.current) {
+        // Play sound if user has clicked at least once
+        if (alertSoundRef.current && userInteracted) {
           alertSoundRef.current.currentTime = 0;
-          alertSoundRef.current.play().catch((err) => {
-            console.warn('🔇 Audio play blocked by browser:', err);
-          });
+          alertSoundRef.current.play().catch(err => console.error("Audio Play Error:", err));
         }
-
-        setTimeout(() => setNewIncidentAlert(false), 6000);
-      },
-      (error) => {
-        console.error('🔥 Firestore listener error:', error);
       }
-    );
+
+      setTimeout(() => setNewIncidentAlert(false), 6000);
+    });
 
     return () => unsubscribe();
-  }, [session, fetchEmergencies]);
-
-
-useEffect(() => {
-  const unlock = () => {
-    alertSoundRef.current?.play().then(() => {
-      alertSoundRef.current?.pause();
-      alertSoundRef.current!.currentTime = 0;
-    }).catch(() => {});
-    window.removeEventListener('click', unlock);
-  };
-  window.addEventListener('click', unlock);
-  return () => window.removeEventListener('click', unlock);
-}, []);
-
-
-
-
-
-
-
-
-  // ─── Helpers ────────────────────────────────────────────────────────────────
-
-  const handleUpdateStatus = async (emergencyId: string, status: Emergency['status']) => {
-    try {
-      const response = await fetch(`/api/emergencies/${emergencyId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      const result = await response.json();
-      if (result.success) {
-        await fetchEmergencies();
-      }
-    } catch (error) {
-      console.error('Error updating emergency:', error);
-    }
-  };
+  }, [session, fetchEmergencies, userInteracted]);
 
   const pendingCount = emergencies.filter((e) => e.status === 'pending').length;
 
-  // ─── Render ─────────────────────────────────────────────────────────────────
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      
+      {/* ── Invisible Interaction Shield ── */}
+      {/* This disappears after the first click, unlocking audio automatically */}
+      {!userInteracted && (
+        <div 
+          onClick={handleInteraction}
+          className="fixed inset-0 z-[9999] cursor-pointer"
+          title="Click anywhere to enable audio alerts"
+        />
+      )}
 
-      {/* ── Firebase New Incident Alert Banner ── */}
+      {/* ── Firebase Alert Banner ── */}
       {newIncidentAlert && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce">
           <Bell size={24} className="animate-pulse" />
@@ -207,16 +136,10 @@ useEffect(() => {
           <button
             onClick={() => {
               setNewIncidentAlert(false);
-              // Stop sound when user dismisses the alert
-              if (alertSoundRef.current) {
-                alertSoundRef.current.pause();
-                alertSoundRef.current.currentTime = 0;
-              }
+              alertSoundRef.current?.pause();
             }}
             className="ml-4 text-red-200 hover:text-white text-xl font-bold"
-          >
-            ✕
-          </button>
+          >✕</button>
         </div>
       )}
 
@@ -224,82 +147,56 @@ useEffect(() => {
       <header className="bg-gray-800 border-b border-gray-700 shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-
-            {/* Logo + Title */}
             <div className="flex items-center gap-4">
               <div className="bg-red-600 p-3 rounded-xl">
                 <Bell className="text-white" size={32} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">
-                  Emergency Management System
-                </h1>
-                <p className="text-gray-400 text-sm">Real-time emergency response and tracking</p>
+                <h1 className="font-bold text-white tracking-tight">{session?.user?.lguCode} Emergency Management System</h1>
+                <p className="text-gray-400 text-sm">Real-time emergency response & monitoring</p>
               </div>
             </div>
 
             <NavigationMenu userRole={session?.user?.role || 'user'} />
 
-            {/* Right Controls */}
             <div className="flex items-center gap-4">
+              {/* Audio Status Indicator */}
+              <span className={`text-[10px] px-2 py-1 rounded border ${userInteracted ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}>
+                {userInteracted ? 'AUDIO READY' : 'CLICK TO ENABLE AUDIO'}
+              </span>
 
-              {/* User Menu */}
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
                 >
-                  {session?.user?.role === 'system-admin' ? (
-                    <Shield className="text-yellow-400" size={20} />
-                  ) : (
-                    <UserIcon className="text-white" size={20} />
-                  )}
+                  {session?.user?.role === 'system-admin' ? <Shield className="text-yellow-400" size={20} /> : <UserIcon className="text-white" size={20} />}
                   <div className="text-left">
                     <p className="text-sm font-semibold text-white">{session?.user?.name}</p>
                     <p className="text-xs text-gray-400 capitalize">{session?.user?.role}</p>
                   </div>
                 </button>
-
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50">
-                    <div className="px-4 py-2 border-b border-gray-200">
-                      <p className="text-sm font-semibold text-gray-900">{session?.user?.name}</p>
-                      <p className="text-xs text-gray-600">{session?.user?.email}</p>
-                    </div>
-                    <button
-                      onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                    >
-                      <LogOut size={16} />
-                      Sign Out
+                    <button onClick={() => signOut({ callbackUrl: '/auth/signin' })} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                      <LogOut size={16} /> Sign Out
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* Auto-refresh Toggle */}
-              <button
+              {/* <button
                 onClick={() => setAutoRefresh(!autoRefresh)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  autoRefresh
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-600 text-white hover:bg-gray-700'
-                }`}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${autoRefresh ? 'bg-green-600' : 'bg-gray-600'} text-white`}
               >
-                <RefreshCw
-                  className={`inline mr-2 ${autoRefresh ? 'animate-spin' : ''}`}
-                  size={16}
-                />
+                <RefreshCw className={`inline mr-2 ${autoRefresh ? 'animate-spin' : ''}`} size={16} />
                 Auto-Refresh {autoRefresh ? 'ON' : 'OFF'}
-              </button>
+              </button> */}
 
-              {/* Pending Bell */}
               {pendingCount > 0 && (
                 <div className="relative">
                   <Bell className="text-yellow-500 animate-pulse" size={32} />
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
-                    {pendingCount}
-                  </span>
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">{pendingCount}</span>
                 </div>
               )}
             </div>
@@ -307,35 +204,18 @@ useEffect(() => {
         </div>
       </header>
 
-      {/* ── Main Content ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <main className="max-w-7xl mx-auto px-4 py-4">
         {loading ? (
-          <div className="flex items-center justify-center h-96">
-            <div className="text-white text-xl">Loading dashboard...</div>
-          </div>
+          <div className="flex items-center justify-center h-96 text-white text-xl">Loading dashboard...</div>
         ) : (
           <div className="space-y-4">
-
-            {/* Tab Navigation */}
             <div className="flex gap-2 bg-gray-700 p-2 px-4 rounded-xl w-fit">
-              <Link
-                href="/map"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-200 font-bold hover:text-white"
-              >
-                Map
-              </Link>
+              <Link href="/map" target="_blank" className="text-gray-200 font-bold hover:text-white">Map</Link>
             </div>
-
-            {/* Content Area */}
-            <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Active Emergencies</h2>
-                <EmergencyManagement refreshTrigger={refreshTrigger} />
-              </div>
+            <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden p-6">
+              <h2 className="text-2xl font-bold text-white mb-4">Active Emergencies</h2>
+              <EmergencyManagement refreshTrigger={refreshTrigger} />
             </div>
-
           </div>
         )}
       </main>

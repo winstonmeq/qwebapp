@@ -119,7 +119,7 @@ export default function DashboardPage() {
                 <h1 className="font-bold text-white tracking-tight">
                   {session?.user.lguCode} Emergency Management System
                 </h1>
-                <p className="text-gray-400 text-sm">Real-time emergency response and tracking</p>
+                <p className="text-gray-400 text-sm">Real-time emergency report & mapping</p>
               </div>
             </div>
 

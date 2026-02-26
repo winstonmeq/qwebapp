@@ -10,6 +10,8 @@ import {
   Shield, 
   Home, 
   Settings,
+  Newspaper,
+  Hospital,
   ChevronDown,
   BarChart3,
   Activity // Added an icon for the Responder menu
@@ -51,13 +53,18 @@ export default function NavigationMenu({ userRole }: NavigationMenuProps) {
     { href: '/users', label: 'User Management', icon: Users, description: 'Manage system users' },
     { href: '/admin', label: 'Admin Dashboard', icon: Shield, description: 'System administration' },
     { href: '/reports', label: 'Reports & Analytics', icon: BarChart3, description: 'Generate reports' },
+    { href: '/news', label: 'News Dashboard', icon: Newspaper, description: 'News Dashboard' },
+    { href: '/hospitals', label: 'Hospitals Dashboard', icon: Hospital, description: 'Hospitals Dashboard' },
+
     { href: '/settings', label: 'Settings', icon: Settings, description: 'System configuration' },
   ];
 
   const responderLinks = [
-    { href: '/users', label: 'User Management', icon: Users, description: 'Manage system users' },
-    { href: '/reports', label: 'Reports & Analytics', icon: BarChart3, description: 'Generate reports' },
-    { href: '/settings', label: 'Settings', icon: Settings, description: 'System configuration' },
+    // { href: '/users', label: 'User Management', icon: Users, description: 'Manage system users' },
+    // { href: '/reports', label: 'Reports & Analytics', icon: BarChart3, description: 'Generate reports' },
+    // { href: '/settings', label: 'Settings', icon: Settings, description: 'System configuration' },
+    { href: '/news', label: 'News Dashboard', icon: BarChart3, description: 'News Dashboard' },
+
   ];
 
   return (
