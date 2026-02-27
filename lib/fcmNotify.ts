@@ -1,25 +1,15 @@
-import { GoogleAuth } from 'google-auth-library';
+import * as admin from 'firebase-admin';
 import FcmTokenModel from '@/models/Fcmtoken';
 
-const PROJECT_ID = process.env.FIREBASE_PROJECT_ID!;
-
-async function getAccessToken(): Promise<string> {
-  const auth = new GoogleAuth({
-    credentials: {
-      client_email: process.env.FIREBASE_CLIENT_EMAIL!,
-      private_key: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
-    },
-    scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+// Ensure this is initialized in your singleton/app setup
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    }),
   });
-  const client = await auth.getClient();
-  const tokenResponse = await client.getAccessToken();
-  return tokenResponse.token!;
-}
-
-function chunkArray<T>(arr: T[], size: number): T[][] {
-  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-    arr.slice(i * size, i * size + size)
-  );
 }
 
 export async function notifyByLguCode(
@@ -28,39 +18,57 @@ export async function notifyByLguCode(
   body: string,
   data?: Record<string, string>
 ) {
-  const records = await FcmTokenModel.find({ lguCode }).lean();
-  const tokens = records.map((r) => r.token);
+  // 1. Fetch only the tokens
+  const records = await FcmTokenModel.find({ lguCode }).select('token').lean();
+  const tokens = records.map((r) => r.token).filter(Boolean) as string[];
 
-  if (tokens.length === 0) {
-    console.log(`No FCM tokens found for lguCode: ${lguCode}`);
-    return;
-  }
+  if (tokens.length === 0) return;
 
-  const accessToken = await getAccessToken();
-  const chunks = chunkArray(tokens, 500); // FCM multicast limit
+  // 2. Prepare the message
+const message: admin.messaging.MulticastMessage = {
+  notification: { title, body },
+  data: data || {},
+  tokens: tokens,
+  android: {
+    notification: {
+      channelId: 'qalert_emergency_channel',
+      sound: 'default',
+      // Explicitly cast or use the literal value to satisfy TypeScript
+      priority: 'high' as const, 
+    },
+  },
+  apns: {
+    payload: {
+      aps: {
+        sound: 'default',
+        badge: 1,
+      },
+    },
+  },
+};
 
-  for (const chunk of chunks) {
-    const res = await fetch(
-      `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: {
-            notification: { title, body },
-            tokens: chunk,
-            ...(data && { data }),
-          },
-        }),
+try {
+  const response = await admin.messaging().sendEachForMulticast(message);
+  
+  if (response.failureCount > 0) {
+    console.error(`Failed to send ${response.failureCount} messages.`);
+    
+    // Inspect specific failures
+    response.responses.forEach((resp, idx) => {
+      if (!resp.success) {
+        const error = resp.error;
+        console.error(`Token at index ${idx} failed:`, error?.code);
+        
+        // If the token is no longer valid, delete it from MongoDB
+        if (error?.code === 'messaging/registration-token-not-registered' || 
+            error?.code === 'messaging/invalid-registration-token') {
+          const failedToken = tokens[idx];
+          FcmTokenModel.deleteOne({ token: failedToken }).catch(console.error);
+        }
       }
-    );
-
-    if (!res.ok) {
-      const err = await res.json();
-      console.error('FCM send error:', err);
-    }
+    });
   }
+} catch (error) {
+  console.error('FCM Admin SDK Error:', error);
+}
 }
