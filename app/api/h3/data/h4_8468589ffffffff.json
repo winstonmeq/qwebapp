@@ -1,0 +1,73 @@
+{
+  "lgu": [
+    {
+      "barName":"Daliao",
+      "lguName": "Toril",
+      "online": {
+        "paid": true,
+        "munId": "687f7dc00a193d8c3d2f40d9",
+        "provId": "687f788a0a193d8c3d2f40bb"
+      },
+      "hex_list": [
+        "8868589027fffff",
+        "8868589021fffff",
+        "8868589023fffff",
+        "886858902bfffff",
+        "886858903dfffff"
+      
+      ],
+      "localhotlines": {
+        "bdrrmo": "09081139032"
+      },
+      "hotlines": [
+        {
+          "name": "BDRRMO",
+          "address": "Daliao",
+          "contact": "09081139032",
+          "contact2": "09081139032",
+          "coordinates": [7.0089, 125.50359]
+        },
+        {
+          "name": "POLICE",
+          "address": "Toril Police Station",
+          "contact": "09985987069",
+          "contact2": "09985987069",
+          "coordinates": [7.01858, 125.49844]
+        },
+        {
+          "name": "FIRE",
+          "address": "Daliao Fire Station",
+          "contact": "09081139032",
+          "coordinates": [7.00859, 125.50390]
+        }
+      ],
+      "hospitals": [
+         {
+          "name": "Toril Health Center",
+          "address": "Davao-Cotabato Rd, Toril",
+          "contact": "",
+          "coordinates": [7.05708, 124.97224]
+        },
+        {
+          "name": "Toril Urban Health Center",
+          "address": "Santo Cristo St, Daliao",
+          "contact": "",
+          "coordinates": [7.05708, 124.97224]
+        },
+         {
+          "name": "Barangay Hall",
+          "address": "Agton St. Daliao,",
+          "contact": "09081139032",
+          "coordinates": [7.01974, 125.49713]
+        }
+       
+      ]
+    }
+
+
+
+
+
+    
+  ]
+}

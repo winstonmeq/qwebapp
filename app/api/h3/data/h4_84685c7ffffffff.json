@@ -25,18 +25,21 @@
           "name": "MDRRMO",
           "address": "Poblacion, Kidapawan City",
           "contact": "09089217888",
+          "contact2": "09089217888",
           "coordinates": [7.0087899, 125.0918493]
         },
         {
-          "name": "Police",
-          "address": "Poblacion, Kidapawan City",
+          "name": "POLICE",
+          "address": "Kidapawan Police Station",
           "contact": "09398127169",
+          "contact2": "09398127169",
           "coordinates": [7.0076206, 125.0912841]
         },
         {
-          "name": "Fire",
-          "address": "Magsaysay, Kidapawan City",
+          "name": "FIRE",
+          "address": "Kidapawan Fire Station",
           "contact": "09635866411",
+          "contact2": "09635866411",
           "coordinates": [7.0134925, 125.0671693]
         }
       ],
@@ -70,40 +73,43 @@
 
       ],
       "localhotlines": {
-        "bdrrmo": "1222332323"
+        "bdrrmo": "09193373409"
       },
       "hotlines": [
         {
           "name": "MDRRMO",
-          "address": "Poblacion, President Roxas",
-          "contact": "09089417888",
-          "coordinates": [7.2087899, 125.0928493]
+          "address": "Municipal Gym, Poblacion,",
+          "contact": "09193373409",
+          "contact2": "09193373409",
+          "coordinates": [7.15729, 125.05063]
         },
         {
-          "name": "Police",
-          "address": "Poblacion, President Roxas",
-          "contact": "09398227169",
-          "coordinates": [7.0276206, 125.0922841]
+          "name": "POLICE",
+          "address": "Pres. Roxas Police Station",
+          "contact": "09308724295",
+          "contact2": "09308724295",
+          "coordinates": [7.15895, 125.05130]
         },
         {
-          "name": "Fire",
-          "address": "Poblacion, President Roxas",
-          "contact": "09632866411",
-          "coordinates": [7.0234925, 125.0671623]
+          "name": "FIRE",
+          "address": "Pres. Roxas Fire Station",
+          "contact": "09308954061",
+          "contact2": "09308954061",
+          "coordinates": [7.15903, 125.05187]
         }
       ],
       "hospitals": [
         {
           "name": "New Cebu Hospital",
-          "address": "Ilomavis Tourist Rd, Antipas City",
-          "contact": "0645774553",
-          "coordinates": [7.0217285, 125.0935836]
+          "address": "National Rd. New Cebu",
+          "contact": "",
+          "coordinates": [7.09276, 125.03965]
         },
         {
           "name": "Rural Health Unit",
           "address": "Poblacion, President Roxas",
-          "contact": "0645726018",
-          "coordinates": [7.0213013, 125.0897208]
+          "contact": "",
+          "coordinates": [7.15862, 125.05127]
         }
       ]
     }

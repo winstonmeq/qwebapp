@@ -14,54 +14,57 @@
         "88685c4713fffff",
         "88685c4445fffff",
         "88685c471bfffff",
-        "88685c4449fffff"
+        "88685c4449fffff",
+        "88685c4627fffff"
 
       
       ],
       "localhotlines": {
-        "bdrrmo": "09089217888"
+        "bdrrmo": "09514800323"
       },
       "hotlines": [
         {
           "name": "MDRRMO",
-          "address": "Poblacion, Kidapawan City",
-          "contact": "09089217888",
-          "coordinates": [7.0087899, 125.0918493]
+          "address": "Matalam",
+          "contact": "09458378833",
+          "contact2": "09458378833",
+
+          "coordinates": [7.08279, 124.90151]
         },
         {
-          "name": "Police",
-          "address": "Poblacion, Kidapawan City",
-          "contact": "09398127169",
-          "coordinates": [7.0076206, 125.0912841]
+          "name": "POLICE",
+          "address": "Matalam Police Station",
+          "contact": "09103446653",
+          "contact2": "09103446653",
+
+          "coordinates": [7.08472, 124.90075]
         },
         {
-          "name": "Fire",
-          "address": "Magsaysay, Kidapawan City",
-          "contact": "09635866411",
-          "coordinates": [7.0134925, 125.0671693]
+          "name": "FIRE",
+          "address": "Matalam Fire Station",
+          "contact": "09192607516",
+          "contact2": "09192607516",
+
+          "coordinates": [7.08285, 124.90102]
         }
       ],
       "hospitals": [
         {
-          "name": "Kidapawan Medical Specialists Center, Inc.",
-          "address": "Ilomavis Tourist Rd, Kidapawan City",
-          "contact": "0645774553",
-          "coordinates": [7.0217285, 125.0935836]
+          "name": "Rural Health Unit",
+          "address": "Andress Bonifacion St.",
+          "contact": "09094560161",
+          "coordinates": [7.08421, 124.90187]
         },
         {
-          "name": "Kidapawan City Hospital",
-          "address": "National Highway Rd, Kidapawan City",
-          "contact": "0645775029",
-          "coordinates": [7.0082535, 125.0887983]
-        },
-        {
-          "name": "Madonna Medical Center, Inc.",
-          "address": "National Highway Rd, Kidapawan City",
-          "contact": "0645726018",
-          "coordinates": [7.0213013, 125.0897208]
+          "name": "Cotabato Provincial Hospital",
+          "address": "Amas, Kidapawan City",
+          "contact": "",
+          "coordinates": [7.05708, 124.97224]
         }
+       
       ]
     },
+
 
 
     {
@@ -73,46 +76,58 @@
         "provId": "687f788a0a193d8c3d2f40bb"
       },
       "hex_list": [
-        "88685c720dfffff"
+        "88685c55adfffff",
+        "88685c42d3fffff",
+        "88685c55a5fffff",
+        "88685c4299fffff",
+        "88685c42d1fffff",
+        "88685c42dbfffff",
+        "88685c42d7fffff"
        
 
       ],
       "localhotlines": {
-        "bdrrmo": "1222332323"
+        "bdrrmo": "0910363386"
       },
       "hotlines": [
         {
           "name": "MDRRMO",
-          "address": "Poblacion, President Roxas",
-          "contact": "09089417888",
-          "coordinates": [7.2087899, 125.0928493]
+          "address": "Kabacan",
+          "contact": "0910363386",
+          "contact2": "0910363386",
+
+          "coordinates": [7.10907, 124.82320]
         },
         {
-          "name": "Police",
-          "address": "Poblacion, President Roxas",
-          "contact": "09398227169",
-          "coordinates": [7.0276206, 125.0922841]
+          "name": "POLICE",
+          "address": "Kabacan Police",
+          "contact": "0939339316",
+          "contact2": "0939339316",
+          "coordinates": [7.10884, 124.82365]
         },
         {
-          "name": "Fire",
-          "address": "Poblacion, President Roxas",
-          "contact": "09632866411",
-          "coordinates": [7.0234925, 125.0671623]
+          "name": "FIRE",
+          "address": "Kabacan Fire Station",
+          "contact": "0910048957",
+          "contact2": "0910048957",
+          "coordinates": [7.10898, 124.82223]
         }
+        
       ],
       "hospitals": [
-        {
-          "name": "New Cebu Hospital",
-          "address": "Ilomavis Tourist Rd, Antipas City",
-          "contact": "0645774553",
-          "coordinates": [7.0217285, 125.0935836]
-        },
-        {
+         {
           "name": "Rural Health Unit",
-          "address": "Poblacion, President Roxas",
-          "contact": "0645726018",
-          "coordinates": [7.0213013, 125.0897208]
+          "address": "Quezon St.,Kabacan",
+          "contact": "0926397049",
+          "coordinates": [7.10914, 124.82256]
+        },
+         {
+          "name": "USM Hospital",
+          "address": "University Hospital",
+          "contact": "0642482346",
+          "coordinates": [7.12281, 124.83023]
         }
+        
       ]
     }
 
