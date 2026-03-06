@@ -22,8 +22,6 @@ import Link from 'next/link';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subMonths } from 'date-fns';
 
 
-
-
 interface ReportData {
   period: string;
   startDate: string;
@@ -45,11 +43,13 @@ interface ReportData {
   byType: {
     medical: number;
     fire: number;
-    crime: number;
-    accident: number;
-    'natural-disaster': number;
-    other: number;
+    police: number;
+    flood: number;
+    landslide: number;
+    ambulance: number;
   };
+
+
   responseStats: {
     averageResponseTime: string;
     totalResponders: number;
@@ -61,6 +61,7 @@ interface ReportData {
     count: number;
   }>;
   emergenciesList: Array<any>;
+  municipality: Record<string, number>;
 }
 
 export default function ReportsPage() {
@@ -123,341 +124,96 @@ export default function ReportsPage() {
     }
   };
 
-  const downloadPDF = async () => {
-    if (!reportData) return;
 
-    try {
-      // Dynamic import to avoid SSR issues
-      const { default: jsPDF } = await import('jspdf');
-      const { default: autoTable } = await import('jspdf-autotable');
 
-      const doc = new jsPDF();
-      let yPosition = 20;
 
-      // Title
-      doc.setFontSize(20);
-      doc.setTextColor(41, 128, 185);
-      doc.text('EMERGENCY MANAGEMENT REPORT', 105, yPosition, { align: 'center' });
-      
-      yPosition += 10;
-      doc.setFontSize(14);
-      doc.setTextColor(52, 73, 94);
-      doc.text(reportData.period, 105, yPosition, { align: 'center' });
-      
-      yPosition += 8;
-      doc.setFontSize(10);
-      doc.setTextColor(127, 140, 141);
-      doc.text(`${reportData.startDate} to ${reportData.endDate}`, 105, yPosition, { align: 'center' });
-      
-      yPosition += 15;
+const downloadPDF = async () => {
+  if (!reportData) return;
 
-      // Summary Section
-      doc.setFontSize(14);
-      doc.setTextColor(52, 73, 94);
-      doc.text('Summary', 14, yPosition);
-      yPosition += 8;
+  try {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
 
-      const summaryData = [
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    
+    // --- Header ---
+    doc.setFontSize(20);
+    doc.setTextColor(41, 128, 185);
+    doc.text('EMERGENCY MANAGEMENT REPORT', pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text(reportData.period, pageWidth / 2, 28, { align: 'center' });
+    
+    // --- 1. Summary Table ---
+    autoTable(doc, {
+      startY: 40,
+      head: [['Metric', 'Value']],
+      body: [
         ['Total Emergencies', reportData.totalEmergencies.toString()],
-        ['Resolved', reportData.byStatus.resolved.toString()],
+        ['Resolved Cases', reportData.byStatus.resolved.toString()],
         ['Resolution Rate', `${reportData.responseStats.resolutionRate}%`],
-        ['Average Response Time', reportData.responseStats.averageResponseTime],
-        ['Total Responders', reportData.responseStats.totalResponders.toString()],
-      ];
+        ['Avg Response Time', reportData.responseStats.averageResponseTime],
+      ],
+      headStyles: { fillColor: [41, 128, 185] },
+    });
 
-      autoTable(doc, {
-        startY: yPosition,
-        head: [['Metric', 'Value']],
-        body: summaryData,
-        theme: 'grid',
-        headStyles: { fillColor: [41, 128, 185], textColor: 255, fontSize: 11 },
-        styles: { fontSize: 10, cellPadding: 3 },
-        columnStyles: {
-          0: { fontStyle: 'bold', cellWidth: 80 },
-          1: { cellWidth: 'auto' }
-        }
-      });
+    let finalY = (doc as any).lastAutoTable.finalY;
 
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    // --- 2. Emergency Type Breakdown (NEW) ---
+    doc.setFontSize(14);
+    doc.setTextColor(44, 62, 80);
+    doc.text('Breakdown by Emergency Type', 14, finalY + 15);
+    
+    autoTable(doc, {
+      startY: finalY + 20,
+      head: [['Emergency Type', 'Count', 'Percentage']],
+      body: Object.entries(reportData.byType).map(([type, count]) => [
+        type.replace('-', ' ').toUpperCase(),
+        count.toString(),
+        `${((count / reportData.totalEmergencies) * 100).toFixed(1)}%`
+      ]),
+      headStyles: { fillColor: [231, 76, 60] }, // Reddish for types
+    });
 
-      // Status Breakdown
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
+    finalY = (doc as any).lastAutoTable.finalY;
 
-      doc.setFontSize(14);
-      doc.setTextColor(52, 73, 94);
-      doc.text('Emergencies by Status', 14, yPosition);
-      yPosition += 8;
+    // --- 3. Municipality Breakdown (NEW) ---
+    // Check if we need a new page for the next table
+    if (finalY > 200) { doc.addPage(); finalY = 10; }
 
-      const statusData = [
-        ['Pending', reportData.byStatus.pending.toString(), `${((reportData.byStatus.pending / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-        ['Acknowledged', reportData.byStatus.acknowledged.toString(), `${((reportData.byStatus.acknowledged / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-        ['Responding', reportData.byStatus.responding.toString(), `${((reportData.byStatus.responding / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-        ['Resolved', reportData.byStatus.resolved.toString(), `${((reportData.byStatus.resolved / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-        ['Cancelled', reportData.byStatus.cancelled.toString(), `${((reportData.byStatus.cancelled / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-      ];
+    finalY = (doc as any).lastAutoTable.finalY;
 
-      autoTable(doc, {
-        startY: yPosition,
-        head: [['Status', 'Count', 'Percentage']],
-        body: statusData,
-        theme: 'striped',
-        headStyles: { fillColor: [241, 196, 15], textColor: 52, fontSize: 11 },
-        styles: { fontSize: 10, cellPadding: 3 }
-      });
+    // --- 4. Status Breakdown ---
+    if (finalY > 220) { doc.addPage(); finalY = 10; }
+    doc.setFontSize(14);
+    doc.text('Status Overview', 14, finalY + 15);
+    autoTable(doc, {
+      startY: finalY + 20,
+      head: [['Status', 'Count']],
+      body: Object.entries(reportData.byStatus).map(([k, v]) => [k.toUpperCase(), v.toString()]),
+      headStyles: { fillColor: [127, 140, 141] },
+    });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    // Save
+    doc.save(`Emergency_Report_${reportData.period.replace(/\s+/g, '_')}.pdf`);
 
-      // Severity Breakdown
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
-
-      doc.setFontSize(14);
-      doc.setTextColor(52, 73, 94);
-      doc.text('Emergencies by Severity', 14, yPosition);
-      yPosition += 8;
-
-      const severityData = [
-        ['Critical', reportData.bySeverity.critical.toString(), `${((reportData.bySeverity.critical / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-        ['High', reportData.bySeverity.high.toString(), `${((reportData.bySeverity.high / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-        ['Medium', reportData.bySeverity.medium.toString(), `${((reportData.bySeverity.medium / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-        ['Low', reportData.bySeverity.low.toString(), `${((reportData.bySeverity.low / reportData.totalEmergencies) * 100).toFixed(1)}%`],
-      ];
-
-      autoTable(doc, {
-        startY: yPosition,
-        head: [['Severity', 'Count', 'Percentage']],
-        body: severityData,
-        theme: 'striped',
-        headStyles: { fillColor: [231, 76, 60], textColor: 255, fontSize: 11 },
-        styles: { fontSize: 10, cellPadding: 3 }
-      });
-
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
-
-      // Emergency Types
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
-
-      doc.setFontSize(14);
-      doc.setTextColor(52, 73, 94);
-      doc.text('Emergencies by Type', 14, yPosition);
-      yPosition += 8;
-
-      const typeData = [
-        ['Medical', reportData.byType.medical.toString()],
-        ['Fire', reportData.byType.fire.toString()],
-        ['Crime', reportData.byType.crime.toString()],
-        ['Accident', reportData.byType.accident.toString()],
-        ['Natural Disaster', reportData.byType['natural-disaster'].toString()],
-        ['Other', reportData.byType.other.toString()],
-      ];
-
-      autoTable(doc, {
-        startY: yPosition,
-        head: [['Type', 'Count']],
-        body: typeData,
-        theme: 'grid',
-        headStyles: { fillColor: [155, 89, 182], textColor: 255, fontSize: 11 },
-        styles: { fontSize: 10, cellPadding: 3 }
-      });
-
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
-
-      // Top Responders
-      if (reportData.topResponders.length > 0) {
-        if (yPosition > 250) {
-          doc.addPage();
-          yPosition = 20;
-        }
-
-        doc.setFontSize(14);
-        doc.setTextColor(52, 73, 94);
-        doc.text('Top Responders', 14, yPosition);
-        yPosition += 8;
-
-        const respondersData = reportData.topResponders.map((r, i) => [
-          `${i + 1}`,
-          r.fName,
-          r.count.toString()
-        ]);
-
-        autoTable(doc, {
-          startY: yPosition,
-          head: [['Rank', 'Name', 'Emergencies Handled']],
-          body: respondersData,
-          theme: 'grid',
-          headStyles: { fillColor: [46, 204, 113], textColor: 255, fontSize: 11 },
-          styles: { fontSize: 10, cellPadding: 3 },
-          columnStyles: {
-            0: { cellWidth: 20, halign: 'center' },
-            1: { cellWidth: 'auto' },
-            2: { cellWidth: 50, halign: 'center' }
-          }
-        });
-      }
-
-      // Emergency Details - New Page
-      doc.addPage();
-      yPosition = 20;
-
-      doc.setFontSize(14);
-      doc.setTextColor(52, 73, 94);
-      doc.text('Emergency Details', 14, yPosition);
-      yPosition += 8;
-
-      const emergencyDetailsData = reportData.emergenciesList.slice(0, 50).map(e => [
-        new Date(e.createdAt).toLocaleDateString(),
-        e.emergencyType.replace('-', ' '),
-        e.severity,
-        e.status,
-        e.userName
-      ]);
-
-      autoTable(doc, {
-        startY: yPosition,
-        head: [['Date', 'Type', 'Severity', 'Status', 'Reporter']],
-        body: emergencyDetailsData,
-        theme: 'striped',
-        headStyles: { fillColor: [52, 73, 94], textColor: 255, fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 2 },
-        columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 30 },
-          2: { cellWidth: 20 },
-          3: { cellWidth: 25 },
-          4: { cellWidth: 'auto' }
-        }
-      });
-
-      // Footer on all pages
-      const pageCount = doc.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(127, 140, 141);
-        doc.text(
-          `Generated on ${new Date().toLocaleString()}`,
-          14,
-          doc.internal.pageSize.height - 10
-        );
-        doc.text(
-          `Page ${i} of ${pageCount}`,
-          doc.internal.pageSize.width - 30,
-          doc.internal.pageSize.height - 10
-        );
-      }
-
-      // Save PDF
-      doc.save(`emergency-report-${reportData.startDate.replace(/,/g, '')}-to-${reportData.endDate.replace(/,/g, '')}.pdf`);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
-    }
-  };
+  } catch (error) {
+    console.error('PDF Generation Error:', error);
+    alert('Failed to generate PDF. Check console for details.');
+  }
+};
 
 
-  const downloadCSV = () => {
-    if (!reportData) return;
 
-    const csv = [
-      ['Emergency Report'],
-      ['Period', reportData.period],
-      ['Start Date', reportData.startDate],
-      ['End Date', reportData.endDate],
-      [''],
-      ['Summary'],
-      ['Total Emergencies', reportData.totalEmergencies.toString()],
-      ['Resolution Rate', `${reportData.responseStats.resolutionRate}%`],
-      [''],
-      ['By Status'],
-      ['Pending', reportData.byStatus.pending.toString()],
-      ['Acknowledged', reportData.byStatus.acknowledged.toString()],
-      ['Responding', reportData.byStatus.responding.toString()],
-      ['Resolved', reportData.byStatus.resolved.toString()],
-      ['Cancelled', reportData.byStatus.cancelled.toString()],
-      [''],
-      ['By Severity'],
-      ['Critical', reportData.bySeverity.critical.toString()],
-      ['High', reportData.bySeverity.high.toString()],
-      ['Medium', reportData.bySeverity.medium.toString()],
-      ['Low', reportData.bySeverity.low.toString()],
-      [''],
-      ['Emergency Details'],
-      ['Date', 'Type', 'Severity', 'Status', 'Reporter', 'Location'],
-      ...reportData.emergenciesList.map(e => [
-        new Date(e.createdAt).toLocaleString(),
-        e.emergencyType,
-        e.severity,
-        e.status,
-        e.userName,
-        `${e.location.latitude}, ${e.location.longitude}`
-      ])
-    ].map(row => row.join(',')).join('\n');
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `emergency-report-${reportData.startDate}-to-${reportData.endDate}.csv`;
-    a.click();
-  };
 
-  const generateReportText = (data: ReportData): string => {
-    return `
-EMERGENCY MANAGEMENT REPORT
-${data.period}
-Period: ${data.startDate} to ${data.endDate}
 
-========================================
-SUMMARY
-========================================
-Total Emergencies: ${data.totalEmergencies}
-Resolution Rate: ${data.responseStats.resolutionRate}%
-Average Response Time: ${data.responseStats.averageResponseTime}
-Total Responders: ${data.responseStats.totalResponders}
 
-========================================
-EMERGENCIES BY STATUS
-========================================
-Pending: ${data.byStatus.pending}
-Acknowledged: ${data.byStatus.acknowledged}
-Responding: ${data.byStatus.responding}
-Resolved: ${data.byStatus.resolved}
-Cancelled: ${data.byStatus.cancelled}
 
-========================================
-EMERGENCIES BY SEVERITY
-========================================
-Critical: ${data.bySeverity.critical}
-High: ${data.bySeverity.high}
-Medium: ${data.bySeverity.medium}
-Low: ${data.bySeverity.low}
 
-========================================
-EMERGENCIES BY TYPE
-========================================
-Medical: ${data.byType.medical}
-Fire: ${data.byType.fire}
-Crime: ${data.byType.crime}
-Accident: ${data.byType.accident}
-Natural Disaster: ${data.byType['natural-disaster']}
-Other: ${data.byType.other}
 
-========================================
-TOP RESPONDERS
-========================================
-${data.topResponders.map((r, i) => `${i + 1}. ${r.fName}: ${r.count} emergencies`).join('\n')}
-
-Generated on: ${new Date().toLocaleString()}
-`;
-  };
 
   if (status === 'loading') {
     return (
@@ -590,21 +346,7 @@ Generated on: ${new Date().toLocaleString()}
                       Export Report
                     </label>
                     <div className="space-y-2">
-                      <button
-                        onClick={downloadCSV}
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                      >
-                        <Download size={18} />
-                        Download CSV
-                      </button>
-                      <button
-                        onClick={downloadPDF}
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                      >
-                        <Download size={18} />
-                        Download Text Report
-                      </button>
-
+                   
                       <button
                         onClick={downloadPDF}
                         className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -728,15 +470,15 @@ Generated on: ${new Date().toLocaleString()}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <TypeCard label="Medical" value={reportData.byType.medical} />
                     <TypeCard label="Fire" value={reportData.byType.fire} />
-                    <TypeCard label="Crime" value={reportData.byType.crime} />
-                    <TypeCard label="Accident" value={reportData.byType.accident} />
-                    <TypeCard label="Natural Disaster" value={reportData.byType['natural-disaster']} />
-                    <TypeCard label="Other" value={reportData.byType.other} />
+                    <TypeCard label="Flood" value={reportData.byType.flood} />
+                    <TypeCard label="Landslide" value={reportData.byType.landslide} />
+                    <TypeCard label="Ambulance" value={reportData.byType.ambulance} />
+                    <TypeCard label="Police" value={reportData.byType.police} />
                   </div>
                 </div>
 
                 {/* Top Responders */}
-                {reportData.topResponders.length > 0 && (
+                {/* {reportData.topResponders.length > 0 && (
                   <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">
                     <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                       <Users size={20} className="text-green-400" />
@@ -756,7 +498,7 @@ Generated on: ${new Date().toLocaleString()}
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             )}
           </div>
@@ -765,6 +507,16 @@ Generated on: ${new Date().toLocaleString()}
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
 
 // Helper Components
 function MetricCard({ title, value, icon: Icon, color }: any) {

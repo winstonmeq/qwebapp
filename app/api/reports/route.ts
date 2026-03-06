@@ -30,12 +30,30 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
+    let query: any = {};
+
+  
+    if (session.user.role === 'system-admin') {
+      // Logic: Leave query.lguCode undefined to fetch all records across all LGUs
+    } else {
+      // Logic: For responders or LGU-admins, enforce the lguCode filter
+      if (!session.user.lguCode) {
+        return NextResponse.json(
+          { success: false, error: 'Access denied: No LGU Code assigned to your account' }, 
+          { status: 403 }
+        );
+      }
+      query.lguCode = session.user.lguCode;
+    }
+
     // Fetch emergencies within date range
     const emergencies = await EmergencyModel.find({
       createdAt: {
         $gte: new Date(startDate),
         $lte: new Date(endDate),
       },
+      lguCode: query.lguCode,
+
     }).sort({ createdAt: -1 });
 
     // Calculate statistics
@@ -62,10 +80,10 @@ export async function POST(request: NextRequest) {
     const byType = {
       medical: emergencies.filter(e => e.emergencyType === 'medical').length,
       fire: emergencies.filter(e => e.emergencyType === 'fire').length,
-      crime: emergencies.filter(e => e.emergencyType === 'flood').length,
-      accident: emergencies.filter(e => e.emergencyType === 'accident').length,
-      'landslide': emergencies.filter(e => e.emergencyType === 'landslide').length,
-      other: emergencies.filter(e => e.emergencyType === 'ambulance').length,
+      flood: emergencies.filter(e => e.emergencyType === 'flood').length,
+      police: emergencies.filter(e => e.emergencyType === 'police').length,
+      landslide: emergencies.filter(e => e.emergencyType === 'landslide').length,
+      ambulance: emergencies.filter(e => e.emergencyType === 'ambulance').length,
     };
 
     // Response Statistics
@@ -99,17 +117,17 @@ export async function POST(request: NextRequest) {
 
     // Get unique responders
     const responderMap = new Map();
-    emergenciesWithResponder.forEach(emergency => {
-      if (emergency.responderName) {
-        const name = emergency.responderName;
-        responderMap.set(name, (responderMap.get(name) || 0) + 1);
-      }
-    });
+    // emergenciesWithResponder.forEach(emergency => {
+    //   if (emergency.responderName) {
+    //     const name = emergency.responderName;
+    //     responderMap.set(name, (responderMap.get(name) || 0) + 1);
+    //   }
+    // });
 
-    const topResponders = Array.from(responderMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
+    // const topResponders = Array.from(responderMap.entries())
+    //   .map(([name, count]) => ({ name, count }))
+    //   .sort((a, b) => b.count - a.count)
+    //   .slice(0, 5);
 
     const resolutionRate = totalEmergencies > 0
       ? Math.round((resolvedEmergencies.length / totalEmergencies) * 100)
@@ -141,7 +159,7 @@ export async function POST(request: NextRequest) {
       bySeverity,
       byType,
       responseStats,
-      topResponders,
+      // topResponders,
       emergenciesList: emergencies,
     };
 

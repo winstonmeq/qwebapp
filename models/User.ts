@@ -10,6 +10,7 @@ export interface IUser extends Document {
   image?: string;
   googleId?: string;
   phone: string;
+  password?: string;
   // --- NEW FIELDS ADDED HERE ---
   sex?: 'Male' | 'Female' | 'Other';
   age?: number;
@@ -41,6 +42,7 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     image: { type: String },
+ password: { type: String },
     googleId: { type: String, unique: true, sparse: true },
     phone: { type: String, required: false, unique: true, sparse: true }, // Sparse allows multiple nulls
     
