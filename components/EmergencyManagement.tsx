@@ -391,7 +391,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
     acknowledged: emergencies.filter(e => e.status === 'acknowledged').length,
     responding: emergencies.filter(e => e.status === 'responding').length,
     resolved: emergencies.filter(e => e.status === 'resolved').length,
-    critical: emergencies.filter(e => e.severity === 'critical').length,
+    critical: emergencies.filter(e => e.severity === 'high' && e.status !== 'resolved').length,
   };
 
   const emergencyTypes = ['all', 'medical', 'fire', 'police', 'flood', 'landslide', 'ambulance'];
