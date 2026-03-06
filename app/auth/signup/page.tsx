@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, User, Phone, AlertCircle, UserPlus } from 'lucide-react';
 
+
+
 export default function SignUpPage() {
+
+
   const router = useRouter();
   const [formData, setFormData] = useState({
     fName: '',

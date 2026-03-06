@@ -6,16 +6,17 @@ import { Activity, AlertTriangle, CheckCircle, Clock, Users } from 'lucide-react
 interface StatsDashboardProps {
   emergencies: Emergency[];
   users: User[];
+  lguCode?: string;
 }
 
-export default function StatsDashboard({ emergencies, users }: StatsDashboardProps) {
+export default function StatsDashboard({ emergencies, users, lguCode }: StatsDashboardProps) {
   const stats = {
     total: emergencies.length,
     pending: emergencies.filter(e => e.status === 'pending').length,
     active: emergencies.filter(e => ['acknowledged', 'responding'].includes(e.status)).length,
     resolved: emergencies.filter(e => e.status === 'resolved').length,
-    critical: emergencies.filter(e => e.severity === 'critical' && e.status !== 'resolved').length,
-    activeUsers: users.filter(u => u.isActive).length,
+    critical: emergencies.filter(e => e.severity === 'high' && e.status !== 'resolved').length,
+    activeUsers: users.filter(u => u.isActive && u.lguCode=== lguCode).length,
   };
 
   const StatCard = ({ 

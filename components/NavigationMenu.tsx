@@ -14,7 +14,8 @@ import {
   Hospital,
   ChevronDown,
   BarChart3,
-  Activity // Added an icon for the Responder menu
+  Activity, // Added an icon for the Responder menu
+  BarChart2
 } from 'lucide-react';
 
 interface NavigationMenuProps {
@@ -61,7 +62,7 @@ export default function NavigationMenu({ userRole }: NavigationMenuProps) {
 
   const responderLinks = [
     // { href: '/users', label: 'User Management', icon: Users, description: 'Manage system users' },
-    { href: '/reports', label: 'Reports & Analytics', icon: BarChart3, description: 'Generate reports' },
+    { href: '/reports', label: 'Reports & Analytics', icon: BarChart2, description: 'Generate reports' },
     // { href: '/settings', label: 'Settings', icon: Settings, description: 'System configuration' },
     { href: '/news', label: 'News Dashboard', icon: BarChart3, description: 'News Dashboard' },
 

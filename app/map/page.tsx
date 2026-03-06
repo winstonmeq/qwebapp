@@ -87,22 +87,7 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [autoRefresh, fetchEmergencies, fetchUsers]);
 
-  const handleUpdateStatus = async (emergencyId: string, status: Emergency['status']) => {
-    try {
-      const response = await fetch(`/api/emergencies/${emergencyId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        await fetchEmergencies();
-      }
-    } catch (error) {
-      console.error('Error updating emergency:', error);
-    }
-  };
+ 
 
   const pendingCount = emergencies.filter(e => e.status === 'pending').length;
 
@@ -195,7 +180,7 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-4">
             {/* Statistics Dashboard */}
-            <StatsDashboard emergencies={emergencies} users={users} />
+            <StatsDashboard emergencies={emergencies} users={users} lguCode={session?.user.lguCode ?? ''} />
 
             {/* Tab Navigation */}
         

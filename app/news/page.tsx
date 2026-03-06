@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
@@ -282,7 +283,7 @@ export default function NewsAdminPage() {
     content:  '',
     author:   sessionName,
     category: 'general',
-    tags:     '',
+    tags:     'safety',
     imageUrl: '',
     lguCode:  sessionLguCode,
     status:   'draft',
@@ -304,6 +305,27 @@ export default function NewsAdminPage() {
     title: '', summary: '', content: '', author: '', category: 'general',
     tags: '', imageUrl: '', lguCode: '', status: 'draft',
   }));
+
+    const router = useRouter();
+  
+
+
+// Derived authorization check
+const isAuthorized = session?.user?.role === 'system-admin' || session?.user?.role === 'responder';
+const isLoading = session === undefined;
+
+useEffect(() => {
+  if (isLoading) return;
+
+  if (!session) {
+    // Unauthenticated
+    router.push('/auth/signin');
+  } else if (!isAuthorized) {
+    // Authenticated but wrong role
+    router.push('/');
+  }
+}, [session, isAuthorized, isLoading, router]);
+
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
 
@@ -406,6 +428,24 @@ export default function NewsAdminPage() {
   const inputCls = 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-indigo-500 focus:ring-indigo-500/20';
 
   // ── Render ─────────────────────────────────────────────────────────────────
+
+
+if (isLoading) {
+  return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      <div className="text-white text-xl ml-4">Loading...</div>
+    </div>
+  );
+}
+
+// Ensure authorized content only
+if (!session || !isAuthorized) return null;
+
+
+
+
+
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
