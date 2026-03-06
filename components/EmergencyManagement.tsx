@@ -330,13 +330,12 @@ const emergencyIcons: Record<EmergencyType | 'default', LucideIcon> = {
 
   const exportEmergencies = () => {
     const csv = [
-      ['Date', 'Name', 'Phone', 'Type', 'Severity', 'Status', 'Description', 'Location'],
+      ['Date','Time', 'Name', 'Phone', 'Type', 'Severity', 'Status', 'Description', 'Location'],
 
       ...filteredEmergencies.map(e => [
         new Date(e.createdAt).toLocaleString(),
         e.userName,
         e.userPhone, 
-        e.lguCode,
         e.emergencyType,
         e.severity,
         e.status,
@@ -682,7 +681,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
 
                       )} */}
 
-                      {/* {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
+                      {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
                         <button
                           onClick={() => handleCancel(emergency._id)}
                           className="text-yellow-400 hover:text-yellow-300 transition-colors"
@@ -690,7 +689,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                         >
                           <XCircle size={18} />
                         </button>
-                      )} */}
+                      )}
 
                       {(session?.user?.role === 'system-admin') && (
                         <button

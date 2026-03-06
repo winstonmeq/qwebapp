@@ -7,7 +7,6 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 
-
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,38 +17,38 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
     
-    // Initialize query
+    // 1. Initialize query
     let query: any = {};
 
-    /**
-     * ROLE-BASED ACCESS CONTROL (RBAC) LOGIC:
-     * 1. system-admin: Sees everything (lguCode remains empty in query)
-     * 2. responder (or any other role): Must be filtered by their specific lguCode
-     */
-    if (session.user.role === 'system-admin') {
-      // Logic: Leave query.lguCode undefined to fetch all records across all LGUs
-    } else {
-      // Logic: For responders or LGU-admins, enforce the lguCode filter
+    // 2. Set Date Range (Current Month)
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    query.createdAt = {
+      $gte: startOfMonth,
+      $lte: endOfMonth
+    };
+
+    // 3. RBAC Logic
+    if (session.user.role !== 'system-admin') {
       if (!session.user.lguCode) {
         return NextResponse.json(
-          { success: false, error: 'Access denied: No LGU Code assigned to your account' }, 
+          { success: false, error: 'Access denied: No LGU Code assigned' }, 
           { status: 403 }
         );
       }
       query.lguCode = session.user.lguCode;
     }
 
-    // ─── Extract Search Params ──────────────────────────────────────────────
+    // 4. Extract Search Params
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    // Add status filter if provided in the URL
-    if (status) {
-      query.status = status;
-    }
+    if (status) query.status = status;
 
-    // ─── Execute Database Query ─────────────────────────────────────────────
+    // 5. Execute Query
     const emergencies = await EmergencyModel
       .find(query)
       .sort({ createdAt: -1 })
@@ -63,10 +62,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Error fetching emergencies:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-    }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
