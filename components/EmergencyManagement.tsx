@@ -567,10 +567,10 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                           <img
                             src={emergency.photoUrl}
                             alt="Evidence"
-                            className="w-12 h-12 object-cover rounded border border-gray-600 transition-transform group-hover:scale-105"
+                            className="w-16 h-16 object-cover rounded border border-gray-600 transition-transform group-hover:scale-105"
                           />
                           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity rounded">
-                            <EyeIcon size={16} className="text-white" />
+                            <EyeIcon size={26} className="text-white" />
                           </div>
                         </div>
                       )}

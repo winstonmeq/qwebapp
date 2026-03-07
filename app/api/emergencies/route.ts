@@ -94,9 +94,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid coordinates' }, { status: 400 });
     }
 
-    console.log('Creating emergency with data:', body);
+
+  // const tenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+
+  //   const reportCount = await EmergencyModel.countDocuments({
+  //     userPhone: body.userPhone,
+  //     createdAt: { $gte: tenMinutesAgo }
+  //   });
+
+  //   if (reportCount >= 3) {
+  //     return NextResponse.json(
+  //       {
+  //         success: false,
+  //         error: "Too many reports sent recently. Please wait a few minutes."
+  //       },
+  //       { status: 429 }
+  //     );
+  //   }
     
-    const emergency = new EmergencyModel({
+
+// LOCATION DUPLICATE CHECK (within 50 meters in last 5 minutes)
+
+// const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+// const duplicateNearby = await EmergencyModel.findOne({
+//    userPhone: body.userPhone,
+//   createdAt: { $gte: fiveMinutesAgo },
+//   location: {
+//     $near: {
+//       $geometry: {
+//         type: "Point",
+//         coordinates: [longitude, latitude]
+//       },
+//       $maxDistance: 50
+//     }
+//   }
+// });
+
+
+
+// if (duplicateNearby) {
+//   return NextResponse.json(
+//     {
+//       success: false,
+//       error: "An incident was already reported nearby recently."
+//     },
+//     { status: 409 }
+//   );
+// }
+
+
+
+const emergency = new EmergencyModel({
       lguCode: body.lguCode, // IMPORTANT: Required by your model
       userId: body.userId,
       userName: body.userName,
@@ -123,20 +172,19 @@ export async function POST(request: NextRequest) {
     timestamp: Date.now(),
     type: emergency.emergencyType
   });
+
+
 } catch (e) {
   console.error("Firebase sync failed", e);
 }
-
-
-
-
-
 
 
     return NextResponse.json({
       success: true,
       data: emergency,
     }, { status: 201 });
+
+
   } catch (error: any) {
     console.error('Error creating emergency:', error);
     return NextResponse.json({

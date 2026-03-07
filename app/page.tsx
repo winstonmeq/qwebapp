@@ -145,7 +145,7 @@ export default function DashboardPage() {
 
       {/* ── Header ── */}
       <header className="bg-gray-800 border-b border-gray-700 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
               <div className="bg-red-600 p-3 rounded-xl">
@@ -185,14 +185,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {/* <button
-                onClick={() => setAutoRefresh(!autoRefresh)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${autoRefresh ? 'bg-green-600' : 'bg-gray-600'} text-white`}
-              >
-                <RefreshCw className={`inline mr-2 ${autoRefresh ? 'animate-spin' : ''}`} size={16} />
-                Auto-Refresh {autoRefresh ? 'ON' : 'OFF'}
-              </button> */}
-
+        
               {pendingCount > 0 && (
                 <div className="relative">
                   <Bell className="text-yellow-500 animate-pulse" size={32} />
@@ -204,7 +197,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-4">
+      <main className="max-w-9xl mx-auto px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center h-96 text-white text-xl">Loading dashboard...</div>
         ) : (
