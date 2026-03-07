@@ -14,7 +14,7 @@ export interface Emergency {
   userId: string;
   userName: string;
   userPhone: string;
-  emergencyType: 'medical' | 'fire' | 'crime' | 'accident' | 'natural-disaster' | 'other';
+  emergencyType: 'medical' | 'fire' | 'police' | 'flood' | 'landslide' | 'ambulance' | 'calls';
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'cancelled';
   description?: string;
@@ -23,8 +23,7 @@ export interface Emergency {
     coordinates: [number, number]; // [longitude, latitude]
     accuracy?: number;
   };
-  responderId?: string;
-  responderName?: string;
+  photoUrl?: string;
   createdAt: string | Date;
   updatedAt: string | Date;
 }

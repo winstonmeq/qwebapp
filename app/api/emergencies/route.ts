@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       severity: body.severity || 'medium',
       description: body.description,
       status: 'pending',
-      // responderId and responderName are optional, so they stay undefined initially
+      photoUrl: body.photoUrl
     });
 
     await emergency.save();

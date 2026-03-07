@@ -12,7 +12,7 @@ export interface IUser extends Document {
   phone: string;
   password?: string;
   // --- NEW FIELDS ADDED HERE ---
-  sex?: 'Male' | 'Female' | 'Other';
+  sex?: 'Male' | 'Female';
   age?: number;
   province?: string;
   municipality?: string;

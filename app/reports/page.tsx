@@ -154,7 +154,7 @@ const downloadPDF = async () => {
       body: [
         ['Total Emergencies', reportData.totalEmergencies.toString()],
         ['Resolved Cases', reportData.byStatus.resolved.toString()],
-        ['Resolution Rate', `${reportData.responseStats.resolutionRate}%`],
+        // ['Resolution Rate', `${reportData.responseStats.resolutionRate}%`],
         // ['Avg Response Time', reportData.responseStats.averageResponseTime],
       ],
       headStyles: { fillColor: [41, 128, 185] },
@@ -419,18 +419,7 @@ const downloadPDF = async () => {
                     icon={CheckCircle}
                     color="bg-green-600"
                   />
-                  <MetricCard
-                    title="Resolution Rate"
-                    value={`${reportData.responseStats.resolutionRate}%`}
-                    icon={TrendingUp}
-                    color="bg-purple-600"
-                  />
-                  <MetricCard
-                    title="Avg Response"
-                    value={reportData.responseStats.averageResponseTime}
-                    icon={Clock}
-                    color="bg-orange-600"
-                  />
+                
                 </div>
 
                 {/* Status Breakdown */}

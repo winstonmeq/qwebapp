@@ -50,8 +50,7 @@ export interface IEmergency extends Document {
     | 'resolved'
     | 'cancelled';
   description?: string;
-  responderId?: string;
-  responderName?: string;
+  photoUrl?: string;
   estimatedArrival?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -88,8 +87,7 @@ const EmergencySchema = new Schema<IEmergency>(
     },
 
     description: { type: String },
-    responderId: { type: String },
-    responderName: { type: String },
+    photoUrl: { type: String },
     estimatedArrival: { type: Date },
   },
   {

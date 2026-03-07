@@ -28,11 +28,14 @@ import {
   Ambulance, 
   Stethoscope, 
   X,
-  LucideIcon
+  LucideIcon,
+  EyeIcon
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import ChatModal from './ChatModal';
 import { Emergency } from '@/types'; 
+import FindGoogle from './GoogleAddress';
+import ImageModal from './ImageModal';
 
 
 interface EmergencyManagementProps {
@@ -52,7 +55,14 @@ export default function EmergencyManagement({ refreshTrigger }: EmergencyManagem
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<'view' | 'edit' | 'respond' | 'acknowledge'>('view');
   const [selectedEmergency, setSelectedEmergency] = useState<Emergency | null>(null);
-  const [responseNote, setResponseNote] = useState('');
+  // const [responseNote, setResponseNote] = useState('');
+const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+
+
+
+
+
   const [formData, setFormData] = useState({
     estimatedArrival: '',
     team: '',
@@ -311,14 +321,12 @@ const emergencyIcons: Record<EmergencyType | 'default', LucideIcon> = {
       notes: '',
       priority: 'normal',
     });
-    setResponseNote('');
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
     setSelectedEmergency(null);
-    setResponseNote('');
     setFormData({
       estimatedArrival: '',
       team: '',
@@ -506,13 +514,13 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                   Emergency
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Reporter
+                  Images
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                 Location
+                Reporter
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Severity
+                  Location
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Status
@@ -549,6 +557,25 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                   </div>
                 </td>
 
+                <td className="px-6 py-4 whitespace-nowrap">
+                    {/* <span className={`px-3 py-1 text-xs font-semibold text-white rounded-full ${getSeverityColor(emergency.severity)}`}>
+                      {emergency.severity.toUpperCase()}
+                    </span> */}
+
+                     {emergency.photoUrl && (
+                        <div className="relative group cursor-pointer" onClick={() => setSelectedImage(emergency.photoUrl ?? null)}>
+                          <img
+                            src={emergency.photoUrl}
+                            alt="Evidence"
+                            className="w-12 h-12 object-cover rounded border border-gray-600 transition-transform group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity rounded">
+                            <EyeIcon size={16} className="text-white" />
+                          </div>
+                        </div>
+                      )}
+                      
+                  </td>
 
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
@@ -577,15 +604,12 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-3 py-1 text-xs font-semibold text-white bg-gray-700 rounded-full capitalize">
                       {/* {emergency.emergencyType.replace('-', ' ')} */}
-                      {emergency.lguCode}
+                      {/* {emergency.location.coordinates[1]},{ emergency.location.coordinates[0]} */}
+                      <FindGoogle lat={emergency.location.coordinates[1]} long={emergency.location.coordinates[0]} />
 
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 text-xs font-semibold text-white rounded-full ${getSeverityColor(emergency.severity)}`}>
-                      {emergency.severity.toUpperCase()}
-                    </span>
-                  </td>
+                
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 text-xs font-semibold text-white rounded-full ${getStatusBadge(emergency.status)}`}>
                       {emergency.status.toUpperCase()}
@@ -614,74 +638,6 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                           >
                             <MessageSquare size={18} />
                           </button>
-{/* 
-                      {emergency.status === 'pending' && (
-                        <>
-                          <button
-                            onClick={() => openAcknowledgeModal(emergency)}
-                            className="text-blue-400 hover:text-blue-300 transition-colors"
-                            title="Acknowledge"
-                          >
-                            <CheckCircle size={18} />
-                          </button>
-                          <button
-                            onClick={() => openRespondModal(emergency)}
-                            className="text-purple-400 hover:text-purple-300 transition-colors"
-                            title="Respond"
-                          >
-                            <PlayCircle size={18} />
-                          </button>
-
-         
-                           
-
-
-
-
-                        </>
-                      )} */}
-
-                      {/* {emergency.status === 'acknowledged' && (
-                        <>
-                            <button
-                            onClick={() => openRespondModal(emergency)}
-                            className="text-purple-400 hover:text-purple-300 transition-colors"
-                            title="Start Response"
-                          >
-                            <PlayCircle size={18} />
-                          </button>
-                          
-                          <button
-                            onClick={() => setActiveChat(emergency)}
-                            className="text-green-400 hover:text-green-300 transition-colors"
-                            title="Chat with Reporter"
-                          >
-                              <MessageSquare size={18} />
-                            </button>
-                          
-                          </>
-
-                        
-                      )} */}
-{/* 
-                      {(emergency.status === 'responding' || emergency.status === 'acknowledged') && (
-                        <>
-                            <button
-                            onClick={() => handleResolve(emergency._id)}
-                            className="text-green-400 hover:text-green-300 transition-colors"
-                            title="Mark as Resolved"
-                          >
-                            <CheckCircle size={18} />
-                          </button><button
-                            onClick={() => setActiveChat(emergency)}
-                            className="text-green-400 hover:text-green-300 transition-colors"
-                            title="Chat with Reporter"
-                          >
-                              <MessageSquare size={18} />
-                            </button>
-                        </>
-
-                      )} */}
 
                       {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
                         <button
@@ -692,6 +648,9 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                           <XCircle size={18} />
                         </button>
                       )}
+
+                     
+                                      
 
                       {(session?.user?.role === 'system-admin') && (
                         <button
@@ -962,18 +921,6 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                   </a>
                 </div>
 
-                {/* Responder Info */}
-                {selectedEmergency.responderName && (
-                  <div className="bg-gray-900 rounded-lg p-4 space-y-3">
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Response Information</h3>
-                    <InfoRow label="Responder" value={selectedEmergency.responderName} />
-                    <InfoRow 
-                      label="Responded At" 
-                      value={formatDistanceToNow(new Date(selectedEmergency.createdAt), { addSuffix: true })} 
-                    />
-                  </div>
-                )}
-
                 {/* Quick Actions */}
                 <div className="flex gap-2 pt-4 border-t border-gray-700">
                   {selectedEmergency.status === 'pending' && (
@@ -1047,6 +994,15 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
           </div>
         </div>
       )}
+
+      {/* Image View Modal */}
+{selectedImage && (
+  <ImageModal 
+    imageUrl={selectedImage} 
+    onClose={() => setSelectedImage(null)} 
+  />
+)}
+
 {activeChat && (
   <ChatModal 
     emergency={activeChat} 

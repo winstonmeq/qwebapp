@@ -88,34 +88,34 @@ export async function POST(request: NextRequest) {
 
     };
 
-    // Response Statistics
-    const emergenciesWithResponder = emergencies.filter(e => e.responderName);
-    const resolvedEmergencies = emergencies.filter(e => e.status === 'resolved');
+    // // Response Statistics
+    // const emergenciesWithResponder = emergencies.filter(e => e.responderName);
+    // const resolvedEmergencies = emergencies.filter(e => e.status === 'resolved');
 
-    // Calculate average response time
-    let totalResponseMinutes = 0;
-    let countWithResponseTime = 0;
+    // // Calculate average response time
+    // let totalResponseMinutes = 0;
+    // let countWithResponseTime = 0;
 
-    emergenciesWithResponder.forEach(emergency => {
-      if (emergency.responderName && emergency.createdAt) {
-        const responseTime = differenceInMinutes(
-          new Date(emergency.createdAt),
-          new Date(emergency.updatedAt)
-        );
-        totalResponseMinutes += responseTime;
-        countWithResponseTime++;
-      }
-    });
+    // emergenciesWithResponder.forEach(emergency => {
+    //   if (emergency.responderName && emergency.createdAt) {
+    //     const responseTime = differenceInMinutes(
+    //       new Date(emergency.createdAt),
+    //       new Date(emergency.updatedAt)
+    //     );
+    //     totalResponseMinutes += responseTime;
+    //     countWithResponseTime++;
+    //   }
+    // });
 
-    const averageResponseMinutes = countWithResponseTime > 0 
-      ? Math.round(totalResponseMinutes / countWithResponseTime)
-      : 0;
+    // const averageResponseMinutes = countWithResponseTime > 0 
+    //   ? Math.round(totalResponseMinutes / countWithResponseTime)
+    //   : 0;
 
-    const averageResponseTime = averageResponseMinutes > 0
-      ? averageResponseMinutes < 60
-        ? `${averageResponseMinutes} min`
-        : `${Math.floor(averageResponseMinutes / 60)}h ${averageResponseMinutes % 60}m`
-      : 'N/A';
+    // const averageResponseTime = averageResponseMinutes > 0
+    //   ? averageResponseMinutes < 60
+    //     ? `${averageResponseMinutes} min`
+    //     : `${Math.floor(averageResponseMinutes / 60)}h ${averageResponseMinutes % 60}m`
+    //   : 'N/A';
 
     // Get unique responders
     const responderMap = new Map();
@@ -131,16 +131,16 @@ export async function POST(request: NextRequest) {
     //   .sort((a, b) => b.count - a.count)
     //   .slice(0, 5);
 
-    const resolutionRate = totalEmergencies > 0
-      ? Math.round((resolvedEmergencies.length / totalEmergencies) * 100)
-      : 0;
+    // const resolutionRate = totalEmergencies > 0
+    //   ? Math.round((resolvedEmergencies.length / totalEmergencies) * 100)
+    //   : 0;
 
-    const responseStats = {
-      averageResponseTime,
-      totalResponders: responderMap.size,
-      resolvedCount: resolvedEmergencies.length,
-      resolutionRate,
-    };
+    // const responseStats = {
+    //   averageResponseTime,
+    //   totalResponders: responderMap.size,
+    //   resolvedCount: resolvedEmergencies.length,
+    //   resolutionRate,
+    // };
 
     // Generate period label
     let period = '';
@@ -160,8 +160,7 @@ export async function POST(request: NextRequest) {
       byStatus,
       bySeverity,
       byType,
-      responseStats,
-      // topResponders,
+    
       emergenciesList: emergencies,
     };
 

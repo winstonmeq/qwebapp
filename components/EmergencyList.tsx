@@ -92,11 +92,12 @@ export default function EmergencyList({
                   </p>
                 )}
 
-                {emergency.responderId && (
+                {/* {emergency.responderId && (
                   <div className="mt-2 text-sm text-blue-700">
                     <strong>Responder:</strong> {emergency.responderName}
                   </div>
-                )}
+                )} */}
+
               </div>
 
               {onUpdateStatus && emergency.status === 'pending' && (
