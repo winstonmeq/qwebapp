@@ -47,6 +47,7 @@ interface ReportData {
     flood: number;
     landslide: number;
     ambulance: number;
+    calls: number;
   };
 
 
@@ -154,7 +155,7 @@ const downloadPDF = async () => {
         ['Total Emergencies', reportData.totalEmergencies.toString()],
         ['Resolved Cases', reportData.byStatus.resolved.toString()],
         ['Resolution Rate', `${reportData.responseStats.resolutionRate}%`],
-        ['Avg Response Time', reportData.responseStats.averageResponseTime],
+        // ['Avg Response Time', reportData.responseStats.averageResponseTime],
       ],
       headStyles: { fillColor: [41, 128, 185] },
     });
@@ -474,6 +475,8 @@ const downloadPDF = async () => {
                     <TypeCard label="Landslide" value={reportData.byType.landslide} />
                     <TypeCard label="Ambulance" value={reportData.byType.ambulance} />
                     <TypeCard label="Police" value={reportData.byType.police} />
+                    <TypeCard label="Calls" value={reportData.byType.calls} />
+
                   </div>
                 </div>
 

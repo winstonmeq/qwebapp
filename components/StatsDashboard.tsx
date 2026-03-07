@@ -10,14 +10,16 @@ interface StatsDashboardProps {
 }
 
 export default function StatsDashboard({ emergencies, users, lguCode }: StatsDashboardProps) {
+ 
   const stats = {
-    total: emergencies.length,
-    pending: emergencies.filter(e => e.status === 'pending').length,
-    active: emergencies.filter(e => ['acknowledged', 'responding'].includes(e.status)).length,
-    resolved: emergencies.filter(e => e.status === 'resolved').length,
-    critical: emergencies.filter(e => e.severity === 'high' && e.status !== 'resolved').length,
-    activeUsers: users.filter(u => u.isActive && u.lguCode=== lguCode).length,
-  };
+  total: emergencies.length,
+  pending: emergencies.filter(e => e.status === 'pending').length,
+  active: emergencies.filter(e => ['acknowledged', 'responding'].includes(e.status)).length,
+  resolved: emergencies.filter(e => e.status === 'resolved').length,
+  critical: emergencies.filter(e => e.severity === 'high' && e.status !== 'resolved').length,
+
+  activeUsers: users.filter(u => u.isActive && (!lguCode || lguCode === "" ? true : u.lguCode === lguCode)).length,
+};
 
   const StatCard = ({ 
     title, 

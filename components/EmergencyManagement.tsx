@@ -133,7 +133,7 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
 
 
 // Define a type for your allowed emergency keys
-type EmergencyType = 'police' | 'fire' | 'landslide' | 'flood' | 'ambulance' | 'medical';
+type EmergencyType = 'police' | 'fire' | 'landslide' | 'flood' | 'ambulance' | 'medical' | 'calls';
 
 // Map the keys to LucideIcon components
 const emergencyIcons: Record<EmergencyType | 'default', LucideIcon> = {
@@ -143,6 +143,7 @@ const emergencyIcons: Record<EmergencyType | 'default', LucideIcon> = {
   flood: Waves,
   ambulance: Ambulance,
   medical: Stethoscope,
+  calls: Phone,
   default: AlertTriangle,
 };
 
@@ -370,6 +371,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
   flood: 'bg-cyan-600',        // Cyan/Blue for Water
   ambulance: 'bg-red-600',     // Red for Medical Emergency
   medical: 'bg-emerald-600',   // Green for Clinical/Medical
+  calls: 'bg-brown-400',
   default: 'bg-gray-600',
 };
 
@@ -393,7 +395,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
     critical: emergencies.filter(e => e.severity === 'high' && e.status !== 'resolved').length,
   };
 
-  const emergencyTypes = ['all', 'medical', 'fire', 'police', 'flood', 'landslide', 'ambulance'];
+  const emergencyTypes = ['all', 'medical', 'fire', 'police', 'flood', 'landslide', 'ambulance', 'calls'];
 
   if (loading) {
     return (

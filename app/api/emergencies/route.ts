@@ -12,45 +12,52 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     await connectDB();
-    
-    // 1. Initialize query
-    let query: any = {};
 
-    // 2. Set Date Range (Current Month)
+    // 1. Extract Search Params
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get("status");
+    const limit = parseInt(searchParams.get("limit") || "50");
+
+    // 2. Date Range (Current Month)
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    
-    query.createdAt = {
-      $gte: startOfMonth,
-      $lte: endOfMonth
+    const endOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999
+    );
+
+    // 3. Initialize Query
+    const query: any = {
+      createdAt: {
+        $gte: startOfMonth,
+        $lte: endOfMonth,
+      },
     };
 
-    // 3. RBAC Logic
-    if (session.user.role !== 'system-admin') {
-      if (!session.user.lguCode) {
-        return NextResponse.json(
-          { success: false, error: 'Access denied: No LGU Code assigned' }, 
-          { status: 403 }
-        );
-      }
+    // 4. RBAC Logic
+    if (session.user.role !== "system-admin") {
       query.lguCode = session.user.lguCode;
     }
 
-    // 4. Extract Search Params
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    // 5. Optional Filters
+    if (status) {
+      query.status = status;
+    }
 
-    if (status) query.status = status;
-
-    // 5. Execute Query
-    const emergencies = await EmergencyModel
-      .find(query)
+    // 6. Execute Query
+    const emergencies = await EmergencyModel.find(query)
       .sort({ createdAt: -1 })
       .limit(limit);
 
@@ -61,8 +68,12 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error fetching emergencies:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error("Error fetching emergencies:", error);
+
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 

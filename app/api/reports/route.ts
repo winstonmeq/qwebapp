@@ -84,6 +84,8 @@ export async function POST(request: NextRequest) {
       police: emergencies.filter(e => e.emergencyType === 'police').length,
       landslide: emergencies.filter(e => e.emergencyType === 'landslide').length,
       ambulance: emergencies.filter(e => e.emergencyType === 'ambulance').length,
+      calls: emergencies.filter(e => e.emergencyType === 'calls').length,
+
     };
 
     // Response Statistics

@@ -40,6 +40,7 @@ export interface IEmergency extends Document {
     | 'accident'
     | 'landslide'
     | 'flood'
+    | 'calls'
     | 'ambulance';
   severity: 'low' | 'medium' | 'high' | 'critical';
   status:
@@ -70,7 +71,7 @@ const EmergencySchema = new Schema<IEmergency>(
 
     emergencyType: {
       type: String,
-      enum: ['medical', 'fire', 'police', 'accident', 'landslide', 'flood', 'ambulance'],
+      enum: ['medical', 'fire', 'police', 'accident', 'landslide', 'flood', 'ambulance','calls'],
       required: true,
     },
 
