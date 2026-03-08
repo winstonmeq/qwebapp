@@ -26,13 +26,15 @@ export async function GET(
 // POST — save a new message
 export async function POST(
   req: NextRequest,
-  { params }: { params: { incidentId: string } }
+  context: { params: Promise<{ incidentId: string }> }
 ) {
   await connectDB();
+
+  const { incidentId } = await context.params
   try {
     const body = await req.json();
     const message = await ChatMessage.create({
-      incidentId: params.incidentId,
+      incidentId: incidentId,
       text: body.text,
       sender: body.sender,
       role: body.role,
