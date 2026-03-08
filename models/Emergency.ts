@@ -100,7 +100,7 @@ const EmergencySchema = new Schema<IEmergency>(
  */
 
 // Geo index for near queries
-// EmergencySchema.index({ location: '2dsphere' });
+EmergencySchema.index({ location: '2dsphere' });
 
 // Filter dashboard by status + latest
 EmergencySchema.index({ status: 1, createdAt: -1 });
