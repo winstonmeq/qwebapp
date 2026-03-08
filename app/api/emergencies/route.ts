@@ -95,22 +95,22 @@ export async function POST(request: NextRequest) {
     }
 
 
-  // const tenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
-  //   const reportCount = await EmergencyModel.countDocuments({
-  //     userPhone: body.userPhone,
-  //     createdAt: { $gte: tenMinutesAgo }
-  //   });
+    const reportCount = await EmergencyModel.countDocuments({
+      userPhone: body.userPhone,
+      createdAt: { $gte: tenMinutesAgo }
+    });
 
-  //   if (reportCount >= 3) {
-  //     return NextResponse.json(
-  //       {
-  //         success: false,
-  //         error: "Too many reports sent recently. Please wait a few minutes."
-  //       },
-  //       { status: 429 }
-  //     );
-  //   }
+    if (reportCount >= 2) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too many reports sent recently. Please wait a few minutes."
+        },
+        { status: 429 }
+      );
+    }
     
 
 // LOCATION DUPLICATE CHECK (within 50 meters in last 5 minutes)
@@ -130,8 +130,6 @@ export async function POST(request: NextRequest) {
 //     }
 //   }
 // });
-
-
 
 // if (duplicateNearby) {
 //   return NextResponse.json(
