@@ -36,6 +36,7 @@ import ChatModal from './ChatModal';
 import { Emergency } from '@/types'; 
 import FindGoogle from './GoogleAddress';
 import ImageModal from './ImageModal';
+import io from 'socket.io-client';
 
 
 interface EmergencyManagementProps {
@@ -44,6 +45,9 @@ interface EmergencyManagementProps {
 
 
 export default function EmergencyManagement({ refreshTrigger }: EmergencyManagementProps) {
+
+
+  
   const { data: session } = useSession();
   const [emergencies, setEmergencies] = useState<Emergency[]>([]);
   const [filteredEmergencies, setFilteredEmergencies] = useState<Emergency[]>([]);
@@ -74,6 +78,60 @@ const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
 
 const [activeChat, setActiveChat] = useState<Emergency | null>(null);
+
+const [unreadChats, setUnreadChats] = useState<Record<string, number>>({});
+
+
+useEffect(() => {
+  if (emergencies.length === 0) return;
+
+  const socket = io();
+
+  // Join all emergency rooms so you receive their messages
+  emergencies.forEach((emergency) => {
+    socket.emit("joinIncident", emergency._id);
+  });
+
+  socket.on("newMessage", (payload: { incidentId: string; message: any }) => {
+    const incidentId = payload?.incidentId;
+    const senderId = payload?.message?.sender;
+
+    if (!incidentId) return;
+
+    // Only badge if NOT sent by current admin AND chat is not currently open
+    if (
+      senderId !== session?.user?.id &&
+      (!activeChat || activeChat._id !== incidentId)
+    ) {
+      setUnreadChats((prev) => ({
+        ...prev,
+        [incidentId]: (prev[incidentId] || 0) + 1,
+      }));
+    }
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, [emergencies, activeChat, session?.user?.id]);
+
+
+// Update your chat opening function to clear the badge
+
+const handleOpenChat = (emergency: Emergency) => {
+  setActiveChat(emergency);
+  setUnreadChats(prev => ({ ...prev, [emergency._id]: 0 }));
+};
+
+
+
+
+
+
+
+
+
+
 
 
  useEffect(() => {
@@ -631,13 +689,21 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
                         <Eye size={18} />
                       </button>
 
-                       <button
-                            onClick={() => setActiveChat(emergency)}
-                            className="text-green-400 hover:text-green-300 transition-colors"
-                            title="Chat with Reporter"
-                          >
-                            <MessageSquare size={18} />
-                          </button>
+                <button
+  onClick={() => handleOpenChat(emergency)}
+  className="relative text-green-400 hover:text-green-300 transition-colors p-1"
+  title="Chat with Reporter"
+>
+  <MessageSquare size={25} />
+  {/* ❌ Remove this line — it renders raw text outside the badge */}
+  {/* {unreadChats[emergency._id] > 9 ? '9+' : unreadChats[emergency._id]} */}
+
+  {unreadChats[emergency._id] > 0 && (
+    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center bg-red-600 text-white text-[10px] font-bold rounded-full border-2 border-gray-800 animate-pulse">
+      {unreadChats[emergency._id] > 9 ? '9+' : unreadChats[emergency._id]}
+    </span>
+  )}
+</button>
 
                       {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
                         <button
@@ -1004,12 +1070,14 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
 )}
 
 {activeChat && (
-  <ChatModal 
-    emergency={activeChat} 
-    onClose={() => setActiveChat(null)} 
-    currentUser={session?.user} 
+  <ChatModal
+    key={activeChat._id}  // 👈 forces full remount on every new chat
+    emergency={activeChat}
+    onClose={() => setActiveChat(null)}
+    currentUser={session?.user}
   />
 )}
+
 
     </div>
   );

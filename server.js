@@ -18,6 +18,7 @@ app.prepare().then(async () => {
   // Import TS Modules safely
   const connectDB = getModule("./lib/mongodb");
   const EmergencyModel = getModule("./models/Emergency");
+  const ChatMessage = getModule("./models/ChatMessage"); // ✅ load here
 
   // Connect to Database
   await connectDB();
@@ -28,7 +29,7 @@ app.prepare().then(async () => {
   // Initialize Socket.IO
   const io = new Server(server, {
     cors: {
-      origin: process.env.NEXT_PUBLIC_APP_URL, // Change this to your specific domain in production
+      origin: process.env.NEXT_PUBLIC_APP_URL,
       methods: ["GET", "POST"],
     },
     path: "/socket.io",
@@ -50,10 +51,24 @@ app.prepare().then(async () => {
       console.log(`User ${socket.id} joined LGU room: ${lguCode}`);
     });
 
-    //Chat message logic
+    // Chat message logic — save to DB then broadcast
     socket.on("sendMessage", async ({ incidentId, message }) => {
-      // In a real app, you would save 'message' to MongoDB here
-      io.to(`${incidentId}`).emit("newMessage", message);
+      try {
+        // Save to MongoDB
+        await ChatMessage.create({
+          incidentId,
+          text: message.text,
+          sender: message.sender,
+          role: message.role,
+          timestamp: message.timestamp || new Date(),
+        });
+        console.log(`💬 Message saved for incident: ${incidentId}`);
+      } catch (err) {
+        console.error("❌ Failed to save message:", err);
+      }
+
+      // Broadcast to everyone in the room
+      io.to(`${incidentId}`).emit("newMessage", { incidentId, message });
     });
 
     // Update emergency status
@@ -68,6 +83,7 @@ app.prepare().then(async () => {
         if (updated) {
           io.to(`${emergencyId}`).emit("statusUpdated", updated);
           io.to(`lgu_${updated.lguCode}`).emit("emergencyQueueUpdated", updated);
+          console.log(`🔄 Status updated for emergency: ${emergencyId} → ${status}`);
         }
       } catch (error) {
         console.error("❌ Status update error:", error);
@@ -78,7 +94,6 @@ app.prepare().then(async () => {
       console.log("❌ Client disconnected:", socket.id);
     });
   });
-  
 
   // Make io globally accessible if needed
   global.io = io;
