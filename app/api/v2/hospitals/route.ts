@@ -1,11 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from '@/lib/mongodb';
 import Hospital from "@/models/Hospital";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { Session } from "inspector/promises";
 
 
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) 
+{
   try {
+      
+    const session = await getServerSession(authOptions);
+    const apiKey = request.headers.get('x-api-key');
+    const validApiKey = process.env.MOBILE_API_SECRET_KEY;
+
+    if (!session && apiKey !== validApiKey) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+        
     await connectDB();
 
     // 1. Get the URL from the request
@@ -39,7 +56,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+
+   const session = await getServerSession(authOptions);
+
+    
+ 
+    if (!session || session?.user.role !== 'system-admin') {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
     await connectDB();
+
     const body = await request.json();
     const hospital = await Hospital.create(body);
     return NextResponse.json({ data: hospital }, { status: 201 });

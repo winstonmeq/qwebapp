@@ -84,8 +84,8 @@ export default function HospitalForm({ initialData, isEditing }: HospitalFormPro
 
     try {
       const url = isEditing
-        ? `/api/hospitals/${initialData?._id}`
-        : "/api/hospitals";
+        ? `/api/v2/hospitals/${initialData?._id}`
+        : "/api/v2/hospitals";
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(url, {

@@ -87,7 +87,7 @@ export default function EmergencyMap2({
       acknowledged: 'bg-blue-500',
       responding: 'bg-purple-500',
       resolved: 'bg-green-500',
-      cancelled: 'bg-gray-500',
+      canceled: 'bg-gray-500',
     };
     return badges[status] || 'bg-gray-500';
   };

@@ -45,7 +45,7 @@ export default function HospitalCard({ hospital }: { hospital: Hospital }) {
 
   const handleDelete = async () => {
     setDeleting(true);
-    await fetch(`/api/hospitals/${hospital._id}`, { method: "DELETE" });
+    await fetch(`/api/v2/hospitals/${hospital._id}`, { method: "DELETE" });
     router.refresh();
   };
 

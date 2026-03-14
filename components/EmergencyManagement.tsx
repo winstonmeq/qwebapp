@@ -82,23 +82,52 @@ const [activeChat, setActiveChat] = useState<Emergency | null>(null);
 const [unreadChats, setUnreadChats] = useState<Record<string, number>>({});
 
 
+// useEffect(() => {
+//   if (emergencies.length === 0) return;
+
+//   const socket = io();
+
+//   // Join all emergency rooms so you receive their messages
+//   emergencies.forEach((emergency) => {
+//     socket.emit("joinIncident", emergency._id);
+//   });
+
+//   socket.on("newMessage", (payload: { incidentId: string; message: any }) => {
+//     const incidentId = payload?.incidentId;
+//     const senderId = payload?.message?.sender;
+
+//     if (!incidentId) return;
+
+//     // Only badge if NOT sent by current admin AND chat is not currently open
+//     if (
+//       senderId !== session?.user?.id &&
+//       (!activeChat || activeChat._id !== incidentId)
+//     ) {
+//       setUnreadChats((prev) => ({
+//         ...prev,
+//         [incidentId]: (prev[incidentId] || 0) + 1,
+//       }));
+//     }
+//   });
+
+//   return () => {
+//     socket.disconnect();
+//   };
+// }, [emergencies, activeChat, session?.user?.id]);
+
+//testing update sang chat kay naa daw error ang dati daghan duplicate
+
 useEffect(() => {
-  if (emergencies.length === 0) return;
+  if (!emergencies.length) return;
 
   const socket = io();
 
-  // Join all emergency rooms so you receive their messages
-  emergencies.forEach((emergency) => {
-    socket.emit("joinIncident", emergency._id);
-  });
-
-  socket.on("newMessage", (payload: { incidentId: string; message: any }) => {
+  const handleNewMessage = (payload: { incidentId: string; message: any }) => {
     const incidentId = payload?.incidentId;
     const senderId = payload?.message?.sender;
 
     if (!incidentId) return;
 
-    // Only badge if NOT sent by current admin AND chat is not currently open
     if (
       senderId !== session?.user?.id &&
       (!activeChat || activeChat._id !== incidentId)
@@ -108,12 +137,29 @@ useEffect(() => {
         [incidentId]: (prev[incidentId] || 0) + 1,
       }));
     }
+  };
+
+ // ✅ Join only pending incidents
+emergencies
+  .filter((emergency) => 
+    emergency.status === "pending" || emergency.status === "responding"
+  )
+  .forEach((emergency) => {
+    socket.emit("joinIncident", emergency._id);
   });
 
+  socket.on("newMessage", handleNewMessage);
+
   return () => {
+    socket.off("newMessage", handleNewMessage); // prevent duplicate listeners
     socket.disconnect();
   };
 }, [emergencies, activeChat, session?.user?.id]);
+
+
+
+
+
 
 
 // Update your chat opening function to clear the badge
@@ -315,13 +361,13 @@ const emergencyIcons: Record<EmergencyType | 'default', LucideIcon> = {
       const response = await fetch(`/api/emergencies/${emergencyId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'cancelled' }),
+        body: JSON.stringify({ status: 'canceled' }),
       });
 
       const result = await response.json();
       if (result.success) {
         await fetchEmergencies();
-        alert('Emergency cancelled!');
+        alert('Emergency canceled!');
       }
     } catch (error) {
       console.error('Error cancelling emergency:', error);
@@ -447,7 +493,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
       acknowledged: 'bg-blue-500',
       responding: 'bg-purple-500',
       resolved: 'bg-green-500',
-      cancelled: 'bg-gray-500',
+      canceled: 'bg-gray-500',
     };
     return badges[status] || 'bg-gray-500';
   };
@@ -510,7 +556,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
               <option value="acknowledged">Acknowledged</option>
               <option value="responding">Responding</option>
               <option value="resolved">Resolved</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="canceled">Canceled</option>
             </select>
 
             <select
@@ -705,7 +751,7 @@ const emergencyTypeColors: Record<EmergencyType | 'default', string> = {
   )}
 </button>
 
-                      {emergency.status !== 'resolved' && emergency.status !== 'cancelled' && (
+                      {emergency.status !== 'resolved' && emergency.status !== 'canceled' && (
                         <button
                           onClick={() => handleCancel(emergency._id)}
                           className="text-yellow-400 hover:text-yellow-300 transition-colors"

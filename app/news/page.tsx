@@ -153,7 +153,7 @@ function ImageUploader({ value, onChange }: ImageUploaderProps) {
       const fd = new FormData();
       fd.append('file', file);
 
-      const res  = await fetch('/api/upload', { method: 'POST', body: fd });
+      const res  = await fetch('/api/v2/upload', { method: 'POST', body: fd });
       const json = await res.json();
 
       if (json.success) {
@@ -396,7 +396,7 @@ useEffect(() => {
         lguCode: sessionLguCode,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
       };
-      const url    = editingItem ? `/api/news/${editingItem._id}` : '/api/news';
+      const url    = editingItem ? `/api/v2/news/${editingItem._id}` : '/api/news';
       const method = editingItem ? 'PUT' : 'POST';
       const res    = await fetch(url, {
         method,
@@ -419,7 +419,7 @@ useEffect(() => {
 
   async function handleDelete(item: NewsItem) {
     try {
-      const res  = await fetch(`/api/news/${item._id}`, { method: 'DELETE' });
+      const res  = await fetch(`/api/v2/news/${item._id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) { setDeleteTarget(null); fetchNews(); }
     } catch (e) { console.error(e); }

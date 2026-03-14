@@ -48,7 +48,7 @@ export interface IEmergency extends Document {
     | 'acknowledged'
     | 'responding'
     | 'resolved'
-    | 'cancelled';
+    | 'canceled';
   description?: string;
   photoUrl?: string;
   estimatedArrival?: Date;
@@ -82,7 +82,7 @@ const EmergencySchema = new Schema<IEmergency>(
 
     status: {
       type: String,
-      enum: ['pending', 'acknowledged', 'responding', 'resolved', 'cancelled'],
+      enum: ['pending', 'acknowledged', 'responding', 'resolved', 'canceled'],
       default: 'pending',
     },
 

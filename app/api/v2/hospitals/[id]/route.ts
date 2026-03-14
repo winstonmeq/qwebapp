@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from '@/lib/mongodb';
 import Hospital from "@/models/Hospital";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 
 export async function GET(_: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+
+     const session = await getServerSession(authOptions); 
+        
+     
+        if (!session || session?.user.role !== 'system-admin') {
+          return NextResponse.json(
+            { success: false, error: "Unauthorized" },
+            { status: 401 }
+          );
+        }
+
     await connectDB();
     const params = await context.params;
     const hospital = await Hospital.findById(params.id);
@@ -15,8 +28,21 @@ export async function GET(_: NextRequest, context: { params: Promise<{ id: strin
   }
 }
 
+
+
 export async function PUT(request: NextRequest,context: { params: Promise<{ id: string }> }) {
   try {
+
+     const session = await getServerSession(authOptions);
+
+    if (!session || session?.user.role !== 'system-admin') {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+
     await connectDB();
     const params = await context.params;
     const body = await request.json();
@@ -28,8 +54,20 @@ export async function PUT(request: NextRequest,context: { params: Promise<{ id: 
   }
 }
 
+
+
 export async function DELETE(_: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+
+     const session = await getServerSession(authOptions);
+ 
+    if (!session || session?.user.role !== 'system-admin') {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     await connectDB();
     const params = await context.params;
     const hospital = await Hospital.findByIdAndDelete(params.id);

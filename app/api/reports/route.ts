@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       acknowledged: emergencies.filter(e => e.status === 'acknowledged').length,
       responding: emergencies.filter(e => e.status === 'responding').length,
       resolved: emergencies.filter(e => e.status === 'resolved').length,
-      cancelled: emergencies.filter(e => e.status === 'cancelled').length,
+      canceled: emergencies.filter(e => e.status === 'canceled').length,
     };
 
     // By Severity

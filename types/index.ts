@@ -16,7 +16,7 @@ export interface Emergency {
   userPhone: string;
   emergencyType: 'medical' | 'fire' | 'police' | 'flood' | 'landslide' | 'ambulance' | 'calls';
   severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'cancelled';
+  status: 'pending' | 'acknowledged' | 'responding' | 'resolved' | 'canceled';
   description?: string;
   location: {
     type: 'Point';

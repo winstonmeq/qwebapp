@@ -9,9 +9,13 @@ import { db } from '@/lib/firebase';
 
 export async function GET(request: NextRequest) {
   try {
+
     const session = await getServerSession(authOptions);
 
-    if (!session) {
+    const apiKey = request.headers.get('x-api-key');
+    const validApiKey = process.env.MOBILE_API_SECRET_KEY;
+
+    if (!session && apiKey !== validApiKey) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -25,26 +29,30 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const limit = parseInt(searchParams.get("limit") || "50");
 
-    // 2. Date Range (Last 7 Days Including Today)
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(endDate.getDate() - 6);
-
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
-
+    // 2. Date Range (Current Month)
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999
+    );
 
     // 3. Initialize Query
     const query: any = {
       createdAt: {
-             $gte: startDate,
-            $lte: endDate,
-         },
+        $gte: startOfMonth,
+        $lte: endOfMonth,
+      },
     };
 
     // 4. RBAC Logic
-    if (session.user.role !== "system-admin") {
-      query.lguCode = session.user.lguCode;
+    if (session?.user.role !== "system-admin") {
+      query.lguCode = session?.user.lguCode;
     }
 
     // 5. Optional Filters
@@ -64,7 +72,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error("Error fetching emergencies:", error);
+    console.error("Error fetching emergencies:");
 
     return NextResponse.json(
       { success: false, error: error.message },
@@ -75,9 +83,24 @@ export async function GET(request: NextRequest) {
 
 
 
-
 export async function POST(request: NextRequest) {
   try {
+
+
+ // --- AUTH GATE ---
+    // Allow if: (1) valid NextAuth session, OR (2) valid mobile API key
+    const session = await getServerSession(authOptions);
+      const apiKey = request.headers.get('x-api-key');
+    const validApiKey = process.env.MOBILE_API_SECRET_KEY;
+
+    if (!session && apiKey !== validApiKey) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+
     await connectDB();
     
     const body = await request.json();
@@ -98,7 +121,7 @@ export async function POST(request: NextRequest) {
       createdAt: { $gte: tenMinutesAgo }
     });
 
-    if (reportCount >= 2) {
+    if (reportCount >= 3) {
       return NextResponse.json(
         {
           success: false,
@@ -108,35 +131,6 @@ export async function POST(request: NextRequest) {
       );
     }
     
-
-// LOCATION DUPLICATE CHECK (within 50 meters in last 5 minutes)
-
-// const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-
-// const duplicateNearby = await EmergencyModel.findOne({
-//    userPhone: body.userPhone,
-//   createdAt: { $gte: fiveMinutesAgo },
-//   location: {
-//     $near: {
-//       $geometry: {
-//         type: "Point",
-//         coordinates: [longitude, latitude]
-//       },
-//       $maxDistance: 50
-//     }
-//   }
-// });
-
-// if (duplicateNearby) {
-//   return NextResponse.json(
-//     {
-//       success: false,
-//       error: "An incident was already reported nearby recently."
-//     },
-//     { status: 409 }
-//   );
-// }
-
 
 
 const emergency = new EmergencyModel({

@@ -31,7 +31,7 @@ export default function EmergencyList({
       case 'acknowledged': return 'bg-blue-500 text-white';
       case 'responding': return 'bg-purple-500 text-white';
       case 'resolved': return 'bg-green-500 text-white';
-      case 'cancelled': return 'bg-gray-500 text-white';
+      case 'canceled': return 'bg-gray-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };

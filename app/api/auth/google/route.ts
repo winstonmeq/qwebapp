@@ -8,7 +8,6 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
     const { token, role } = await request.json();
 
     if (!token) {
@@ -28,6 +27,8 @@ export async function POST(request: NextRequest) {
 
     // Extract user info from Google's payload
     const { email, name, picture, sub: googleId } = payload;
+    
+    await connectDB();
 
     // 2. Find or Create the user in MongoDB
     let user = await UserModel.findOne({ email });

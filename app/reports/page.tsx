@@ -32,7 +32,7 @@ interface ReportData {
     acknowledged: number;
     responding: number;
     resolved: number;
-    cancelled: number;
+    canceled: number;
   };
   bySeverity: {
     critical: number;
@@ -433,7 +433,7 @@ const downloadPDF = async () => {
                     <StatusBar label="Acknowledged" value={reportData.byStatus.acknowledged} total={reportData.totalEmergencies} color="bg-blue-500" />
                     <StatusBar label="Responding" value={reportData.byStatus.responding} total={reportData.totalEmergencies} color="bg-purple-500" />
                     <StatusBar label="Resolved" value={reportData.byStatus.resolved} total={reportData.totalEmergencies} color="bg-green-500" />
-                    <StatusBar label="Cancelled" value={reportData.byStatus.cancelled} total={reportData.totalEmergencies} color="bg-gray-500" />
+                    <StatusBar label="Canceled" value={reportData.byStatus.canceled} total={reportData.totalEmergencies} color="bg-gray-500" />
                   </div>
                 </div>
 

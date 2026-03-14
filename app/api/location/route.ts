@@ -8,6 +8,7 @@ import UserModel from '@/models/User';
 
 export async function POST(request: NextRequest) {
   try {
+    
     await connectDB();
     
     const body = await request.json();
