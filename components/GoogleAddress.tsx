@@ -18,11 +18,11 @@ const FindGoogle: React.FC<FindGoogleProps> = ({ lat, long }) => {
     const cacheKey = `loc_${lat}_${long}`;
       
     //   // 1. Check Cache
-      // const cachedData = localStorage.getItem(cacheKey);
-      // if (cachedData) {
-      //   setLocation(cachedData);
-      //   return;
-      // }
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        setLocation(cachedData);
+        return;
+      }
 
       try {
         const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${apiKey}&language=en&region=ph`;

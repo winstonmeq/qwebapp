@@ -47,7 +47,7 @@ export default function SignUpPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fName: formData.fName,
+          name: formData.fName + formData.lName,
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
@@ -116,7 +116,7 @@ export default function SignUpPage() {
                 type="text"
                 required
                 value={formData.lName}
-                onChange={(e) => setFormData({ ...formData, fName: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, lName: e.target.value })}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors"
                 placeholder="Enter your full name"
               />
@@ -161,9 +161,8 @@ export default function SignUpPage() {
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors"
               >
-                <option value="user">User</option>
-                <option value="responder">Responder</option>
-                <option value="admin">Admin</option>
+                <option value="">Select</option> 
+                <option value="user">User</option>                  
               </select>
             </div>
 
